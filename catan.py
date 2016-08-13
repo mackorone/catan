@@ -1,2 +1,0 @@
-class Catan(object):
-    pass
