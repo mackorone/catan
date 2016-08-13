@@ -1,0 +1,2 @@
+class Catan(object):
+    pass
