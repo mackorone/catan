@@ -8,6 +8,7 @@ class Resource(Enum):
     ORE = 2
     SHEEP = 3
     WHEAT = 4
+    DESERT = 5
 
     def __str__(self):
-        return self.name
+        return self.name.lower()

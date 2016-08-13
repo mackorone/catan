@@ -2,4 +2,7 @@ from building import Building
 
 
 class City(Building):
-    pass
+
+    @property
+    def multiplier(self):
+        return 2

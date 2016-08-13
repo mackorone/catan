@@ -9,4 +9,4 @@ class Color(Enum):
     ORANGE = 3
 
     def __str__(self):
-        return self.name
+        return self.name.lower()

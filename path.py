@@ -1,4 +1,11 @@
-class Path(object):
+from abc import (
+    ABCMeta,
+    abstractmethod,
+)
 
-    def __init__(self):
-        raise TypeError
+
+class Path(metaclass=ABCMeta):
+
+    @abstractmethod
+    def foo(self):
+        pass
