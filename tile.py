@@ -13,7 +13,7 @@ class Tile(object):
 
     def __init__(self, resource, number):
         assert isinstance(resource, Resource)
-        assert number in {2, 3, 4, 5, 6, 8, 9, 10, 11, 12}
+        assert number in {None, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12}
         self.resource = resource
         self.number = number
 
@@ -33,7 +33,7 @@ class Tile(object):
         )
         string = string.replace(
             NUMBER_PLACEHOLDER,
-            str(self.number).zfill(2),
+            str(self.number).zfill(2) if self.number else '  ',
         )
 
         chars = [

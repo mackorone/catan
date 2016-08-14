@@ -1,30 +1,21 @@
 from graphics import TILE_LINES
+from pieces import (
+    HEXAGONS,
+    NUMBERS,
+)
+from random import shuffle
 from resource import Resource
 from tile import Tile
-
-
-class InvalidBoardSizeError(Exception):
-    pass
 
 
 class Board(object):
 
     def __init__(self, size):
-        if size < 1:
-            raise InvalidBoardSizeError
-        # TODO: Needed?
+        assert 1 <= size
         self.size = size
-        self.board = Board.blank(size)
+        self.board = Board.generate(size)
 
     def __str__(self):
-        # return '\n'.join([
-        #     str(Tile(Resource.BRICK, 2)),
-        #     '\n'.join(str(Tile(Resource.DESERT, 2)).split('\n')[1:]),
-        #     '\n'.join(str(Tile(Resource.LUMBER, 3)).split('\n')[1:]),
-        #     '\n'.join(str(Tile(Resource.ORE,12)).split('\n')[1:]),
-        #     '\n'.join(str(Tile(Resource.SHEEP, 9)).split('\n')[1:]),
-        #     '\n'.join(str(Tile(Resource.WHEAT, 8)).split('\n')[1:]),
-        # ])
         
         # TODO: MACK - put all hardcoded logic in one place
 
@@ -67,10 +58,7 @@ class Board(object):
                     for tile_j, char in enumerate(tile_line):
                         if char == ' ':
                             continue
-                        try:
-                            chars[spaces_from_top + tile_i][spaces_from_left + tile_j] = char
-                        except:
-                            pass
+                        chars[spaces_from_top + tile_i][spaces_from_left + tile_j] = char
                     
         return '\n'.join([''.join(line) for line in chars])
         
@@ -81,11 +69,37 @@ class Board(object):
         return size * 2 - 1 - abs(row_number - size + 1)
 
     @staticmethod
-    def blank(size):
-        return [
-            [Tile(Resource.SHEEP, 8)] * Board.row_width(size, row_number)
-            for row_number in range(size * 2 - 1)
+    def generate(size):
+
+        hexagons = [
+            res
+            for res, count in HEXAGONS.items()
+            for i in range(count)
         ]
+        shuffle(hexagons)
+
+        numbers = [
+            num
+            for num, count in NUMBERS.items()
+            for i in range(count)
+        ]
+
+        res_index = 0
+        num_index = 0
+        board = []
+        for i in range(size * 2 - 1):
+            row = []
+            for j in range(Board.row_width(size, i)):
+                resource = hexagons[res_index]
+                res_index += 1
+                if resource == Resource.DESERT:
+                    number = None
+                else:
+                    number = numbers[num_index]
+                    num_index += 1      
+                row.append(Tile(resource, number))
+            board.append(row)
+        return board
 
 # TODO: Describe the sideways row/col
 '''
