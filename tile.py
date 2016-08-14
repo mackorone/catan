@@ -1,3 +1,4 @@
+from color import Color
 from graphics import (
     BUILDING_PLACEHOLDER,
     NUMBER_PLACEHOLDER,
@@ -5,7 +6,6 @@ from graphics import (
     ROAD_PLACEHOLDERS,
     TILE_LINES,
 )
-from color import Color
 from resource import Resource
 
 
@@ -18,7 +18,14 @@ class Tile(object):
         self.number = number
 
     def __str__(self, fancy=True):
+        return '\n'.join(
+            ''.join(chars for chars in line)
+            for line in self.chars()
+        )
 
+    def chars(self, fancy=True):
+        """ Matrix of the string representation
+        """
         string = '\n'.join(TILE_LINES)
         string = string.replace(
             RESOURCE_PLACEHOLDER,
@@ -29,19 +36,26 @@ class Tile(object):
             str(self.number).zfill(2),
         )
 
-        if fancy:
-            string = string.replace(
-                self.resource.char,
-                self.resource.color.fore(self.resource.char),
-            )
-            string = string.replace(
-                BUILDING_PLACEHOLDER,
-                Color.GRAY.fore(BUILDING_PLACEHOLDER),
-            )
-            for road_placeholder in ROAD_PLACEHOLDERS:
-                string = string.replace(
-                    road_placeholder,
-                    Color.GRAY.fore(road_placeholder),
-            )
+        chars = [
+            [char for char in line]
+            for line in string.split('\n')
+        ]
 
-        return string
+        if fancy:
+            for row in range(len(chars)):
+                for col in range(len(chars[row])):
+                    chars[row][col] = chars[row][col].replace(
+                        self.resource.char,
+                        self.resource.color.fore(self.resource.char),
+                    )
+                    chars[row][col] = chars[row][col].replace(
+                        BUILDING_PLACEHOLDER,
+                        Color.GRAY.fore(BUILDING_PLACEHOLDER),
+                    )
+                    for road_placeholder in ROAD_PLACEHOLDERS:
+                        chars[row][col] = chars[row][col].replace(
+                            road_placeholder,
+                            Color.GRAY.fore(road_placeholder),
+                    )
+
+        return chars
