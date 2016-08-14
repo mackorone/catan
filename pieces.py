@@ -15,7 +15,7 @@ NUMBERS = {
 }
 
 
-TILES = {
+HEXAGONS = {
     Resource.BRICK: 3,
     Resource.DESERT: 1,
     Resource.LUMBER: 4,
