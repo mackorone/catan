@@ -1,13 +1,9 @@
-from building import Building
-from city import City
-from color import Color
+from board import Board
 
 
 def main():
-    c = City(
-        color=Color.RED,
-        location=(0, 0),
-    )
+    b = Board(size=3)
+    print(b)
 
 
 if __name__ == '__main__':
