@@ -1,8 +1,9 @@
 from board import Board
+from resource import Resource
 
 
 def main():
-    b = Board(size=3)
+    b = Board(size=2)
     print(b)
 
 

@@ -1,3 +1,4 @@
+from resource import Resource
 from tile import Tile
 
 
@@ -14,19 +15,15 @@ class Board(object):
         self.board = Board.blank(size)
 
     def __str__(self):
-        return str(self.board)
-
-    @staticmethod
-    def height(size):
-        return size * 2 - 1
+        return str(Tile(Resource.ORE, 2))
 
     @staticmethod
     def row_width(size, row):
-        return Board.height(size) - abs(row - size + 1)
+        return size * 2 - 1 - abs(row - size + 1)
 
     @staticmethod
     def blank(size):
         return [
-            [None] * Board.row_width(size, row)
-            for row in range(Board.height(size))
+            [Tile(Resource.SHEEP, 8)] * Board.row_width(size, row)
+            for row in range(size * 2 - 1)
         ]
