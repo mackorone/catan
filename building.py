@@ -6,13 +6,13 @@ from abc import (
 
 class Building(metaclass=ABCMeta):
 
-    def __init__(self, color, location):
-        self.__color = color
+    def __init__(self, team, location):
+        self.__team = team
         self.__location = location
 
     @property
-    def color(self):
-        return self.__color
+    def team(self):
+        return self.__team
 
     @property
     def location(self):

@@ -1,4 +1,7 @@
-from graphics import TILE_LINES
+from graphics import (
+    TILE_GRID,
+    grid_to_str,
+)
 from pieces import (
     HEXAGONS,
     NUMBERS,
@@ -10,25 +13,39 @@ from tile import Tile
 
 class Board(object):
 
-    def __init__(self, size):
-        assert 1 <= size
-        self.size = size
-        self.board = Board.generate(size)
+    def __init__(self, height, width):
+        for x in [height, width]:
+            assert 1 <= x
+            assert x % 2 == 1
+        self.__height = height
+        self.__width = width
+        self.size = 3 # TODO
+        self.board = Board.generate(self.size)
 
-    def __str__(self):
+    @property
+    def height(self):
+        return self.__height
+
+    @property
+    def width(self):
+        return self.__width
+
+    def __str__(self, fancy=True):
+
+        # TODO: MACK- return a grid, convert to string
         
         # TODO: MACK - put all hardcoded logic in one place
 
-        tile_height = len(TILE_LINES)
-        tile_narrow = len(TILE_LINES[0].strip())
-        tile_wide = len(TILE_LINES[len(TILE_LINES) // 2].strip())
+        tile_height = len(TILE_GRID)
+        tile_narrow = len(''.join(TILE_GRID[0]).strip())
+        tile_wide = len(''.join(TILE_GRID[len(TILE_GRID) // 2]).strip())
 
         total_height = (tile_height - 1) * len(self.board) + 1
         total_width = (
             (self.size    ) * (tile_wide   - 1) +
             (self.size - 1) * (tile_narrow - 1) + 1
         )
-        chars = [
+        grid = [
             [' ' for i in range(total_width)]
             for j in range(total_height)
         ]
@@ -54,13 +71,12 @@ class Board(object):
                         j * ((tile_wide + tile_narrow) // 2 - 1)
                     )
 
-                for tile_i, tile_line in enumerate(tile.chars()):
+                for tile_i, tile_line in enumerate(tile.grid(fancy=fancy)):
                     for tile_j, char in enumerate(tile_line):
-                        if char == ' ':
-                            continue
-                        chars[spaces_from_top + tile_i][spaces_from_left + tile_j] = char
+                        if char != ' ':
+                            grid[spaces_from_top + tile_i][spaces_from_left + tile_j] = char
                     
-        return '\n'.join([''.join(line) for line in chars])
+        return grid_to_str(grid)
         
 
     # TODO: MACK - kill this
@@ -83,6 +99,7 @@ class Board(object):
             for num, count in NUMBERS.items()
             for i in range(count)
         ]
+        shuffle(numbers)
 
         res_index = 0
         num_index = 0
@@ -119,10 +136,13 @@ class Board(object):
      + -- +   31   + -- +   23   + -- +
     /      \      /      \      /      \
    +   40   + -- +   32   + -- +   24   +
-    \      /      \      /      \      /
-     + -- +   41   + -- +   33   + -- +
+  / \      /      \      /      \      /
+ 2=--+ -- +   41   + -- +   33   + -- +
            \      /      \      /
             + -- +   42   + -- +
-                  \      /
-                   + -- + 
+                  \      / \
+                   + -- +--2:
+                    \  /
+                     3?
+
 '''

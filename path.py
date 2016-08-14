@@ -6,6 +6,18 @@ from abc import (
 
 class Path(metaclass=ABCMeta):
 
-    @abstractmethod
-    def foo(self):
+    def __init__(self, team, edge):
+        self.__team = team
+        self.__edge = edge
+
+    @property
+    def team(self):
+        return self.__team
+
+    @property
+    def edge(self):
+        return self.__edge
+
+    @abstractproperty
+    def permanent(self):
         pass

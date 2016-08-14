@@ -4,7 +4,12 @@ from resource import Resource
 
 
 def main():
-    b = Board(size=3)
+    # t = Tile(Resource.DESERT, None)
+    # print(t.grid())
+    b = Board(
+        height=5,
+        width=5,
+    )
     print(b)
 
 if __name__ == '__main__':

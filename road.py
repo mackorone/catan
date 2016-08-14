@@ -2,4 +2,7 @@ from path import Path
 
 
 class Road(Path):
-    pass
+
+    @property
+    def permanent(self):
+        return True
