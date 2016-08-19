@@ -1,16 +1,21 @@
 from board import Board
-from tile import Tile
+from board_graphic import BoardGraphic
 from resource import Resource
+from tile import Tile
+from tile_graphic import TileGraphic
 
 
 def main():
-    # t = Tile(Resource.DESERT, None)
-    # print(t.grid())
-    b = Board(
-        height=5,
+    # t = Tile(Resource.BRICK, 5)
+    # print(TileGraphic(t))
+    board = Board(
+        height=3,
         width=5,
     )
-    print(b)
+    board_graphic = BoardGraphic(
+        board=board,
+    )
+    print(board_graphic)
 
 if __name__ == '__main__':
     main()
