@@ -8,12 +8,32 @@ from tile import Tile
 
 
 class Board(object):
+    """ Model of the game board
 
+    Rows go from the upper left to the lower right, i.e.:
+
+             + -- + 
+            /      \ 
+      + -- +   00   + -- +
+     /      \      /      \ 
+    +   10   + -- +   01   +     
+     \      /      \      /       
+      + -- +   11   + -- +         
+     /      \      /      \       
+    +   21   + -- +   12   +     
+     \      /      \      /       
+      + -- +   22   + -- +         
+            \      /              
+             + -- +              
+    """
     def __init__(self, height, width):
         Board._assert_valid_size(height, width)
         self.__height = height
         self.__width = width
-        self._board = Board._generate(height, width)
+        self.__board = Board._generate(height, width)
+
+    def __iter__(self):
+        return iter(self.__board)
 
     @property
     def height(self):
@@ -33,7 +53,7 @@ class Board(object):
     @staticmethod
     def _generate(height, width):
 
-        # TODO: MACK - don't hardcode these
+        # TODO: MACK - hardcoded for 5 right now
         hexagons = [
             res
             for res, count in HEXAGONS.items()
@@ -77,30 +97,3 @@ class Board(object):
             min(width, height),
             (width // 2 + 1) + effective_row_number,
         )
-
-# TODO: Describe the sideways row/col
-'''
-                   + -- + 
-                  /      \ 
-            + -- +   00   + -- +
-           /      \      /      \ 
-     + -- +   10   + -- +   01   + -- +
-    /      \      /      \      /      \
-   +   20   + -- +   11   + -- +   02   +
-    \      /      \      /      \      /
-     + -- +   21   + -- +   12   + -- +
-    /      \      /      \      /      \
-   +   30   + -- +   22   + -- +   13   +
-    \      /      \      /      \      /
-     + -- +   31   + -- +   23   + -- +
-    /      \      /      \      /      \
-   +   40   + -- +   32   + -- +   24   +
-  / \      /      \      /      \      /
- 2=--+ -- +   41   + -- +   33   + -- +
-           \      /      \      /
-            + -- +   42   + -- +
-                  \      / \
-                   + -- +--2:
-                    \  /
-                     3?
-'''
