@@ -6,17 +6,12 @@ from abc import (
 
 class Building(metaclass=ABCMeta):
 
-    def __init__(self, team, location):
-        self.__team = team
-        self.__location = location
+    def __init__(self, player):
+        self.__player = player
 
     @property
-    def team(self):
-        return self.__team
-
-    @property
-    def location(self):
-        return self.__location
+    def player(self):
+        return self.__player
 
     @abstractproperty
     def multiplier(self):

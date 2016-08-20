@@ -43,6 +43,20 @@ class Board(object):
     def width(self):
         return self.__width
 
+    def build_city(self, row, column, corner, player):
+        raise NotImplementedError
+
+    def build_settlement(self, row, column, corner, player):
+        assert row < len(self.__board)
+        assert column < len(self.__board[row])
+        # TODO: Enforce two-hop rule
+        assert not self.__board[row][column].get_building(corner)
+        # TODO: Build other tiles too
+        self.__board[row][column].build_settlement(corner, player)
+
+    def build_road(self):
+        raise NotImplementedError
+
     @staticmethod
     def _assert_valid_size(height, width):
         assert 1 <= height
@@ -53,7 +67,9 @@ class Board(object):
     @staticmethod
     def _generate(height, width):
 
-        # TODO: MACK - hardcoded for 5 right now
+        # TODO: Hardcoded for 5 right now
+        # TODO: Ensure that two red numbers don't neighbor each other
+        
         hexagons = [
             res
             for res, count in HEXAGONS.items()

@@ -1,6 +1,7 @@
 from board import Board
-from graphics import UI
-from resource import Resource
+from color import Color
+from player import Player
+from view import View
 
 
 def main():
@@ -8,7 +9,18 @@ def main():
         height=5,
         width=5,
     )
-    print(UI(board))
+    one = Player(
+        name='one',
+        color=Color.RED,
+    )
+    board.build_settlement(
+        row=0,
+        column=0,
+        corner=1,
+        player=one,
+    )
+    print(View(board))
+    
 
 if __name__ == '__main__':
     main()

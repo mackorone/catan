@@ -6,17 +6,12 @@ from abc import (
 
 class Path(metaclass=ABCMeta):
 
-    def __init__(self, team, edge):
-        self.__team = team
-        self.__edge = edge
+    def __init__(self, player):
+        self.__player = player
 
     @property
-    def team(self):
-        return self.__team
-
-    @property
-    def edge(self):
-        return self.__edge
+    def player(self):
+        return self.__player
 
     @abstractproperty
     def permanent(self):

@@ -1,4 +1,4 @@
-""" Config for game pieces, currently hardcoded for size=3
+""" Config for game pieces, currently hardcoded
 """
 
 
