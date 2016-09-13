@@ -3,6 +3,7 @@ from const import (
     NUM_CORNERS,
     NUM_EDGES,
 )
+from pieces import NUMBERS
 from resource import Resource
 from settlement import Settlement
 
@@ -18,14 +19,8 @@ class Tile(object):
 
     def __init__(self, resource, number):
         assert isinstance(resource, Resource)
-        # TODO: MACK - this should be based on the dice...
-        assert number in {
-            None, 
-            2,  3,  4,  5,  6,
-            8,  9, 10, 11, 12,
-        }
         assert (
-            number
+            number in NUMBERS
             if resource != Resource.DESERT
             else number is None
         )

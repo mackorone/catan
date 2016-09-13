@@ -5,6 +5,7 @@ from const import (
 )
 
 
+# TODO: MACK - simplify this
 BUILDING_SPACES = [
     [(2, 9)],
     [(0, 7)],
@@ -14,6 +15,7 @@ BUILDING_SPACES = [
     [(4, 7)],
 ]
 
+# TODO: MACK - simplify this
 NUMBER_SPACES = [
     [(2, 4), (2, 5)],
 ]
@@ -43,6 +45,7 @@ TILE_TEMPLATE = [
    list('  + -- +  '),
 ]
 
+
 assert len(BUILDING_SPACES) == NUM_CORNERS
 assert len(ROAD_SPACES) == NUM_EDGES
 
@@ -56,10 +59,7 @@ def grid_to_str(grid):
 
 
 def str_to_grid(string):
-    return [
-        [char for char in line]
-        for line in string.split('\n')
-    ]
+    return [[c for c in line] for line in string.split('\n')]
 
 
 def tile_grid(tile):
@@ -74,7 +74,7 @@ def replace_resources(tile, tile_grid):
     tile_grid = copy_grid(tile_grid)
     for value, spaces in enumerate(RESOURCE_SPACES):
         for row, col in spaces:
-            if tile.number and abs(7 - tile.number) <= value:
+            if tile.number and abs(7 - tile.number) <= value + 1:
                 tile_grid[row][col] = (
                     tile.resource.color.fore(
                         tile.resource.char
@@ -128,6 +128,7 @@ class View(object):
     def __str__(self, fancy=True):
         return grid_to_str(self.grid(fancy))
 
+    # TODO: MACK - refactor this ugly logic
     def grid(self, fancy=True):
 
         tile_height = len(TILE_TEMPLATE)
