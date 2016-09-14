@@ -1,29 +1,49 @@
 from board import Board
 from color import Color
-from coordinate import Coordinate
+from coordinate import (
+    Coordinate,
+    get_all_neighbors,
+    get_valid_neighbors,
+)
 from dice import Dice
 from player import Player
+from pprint import pprint
 from size import Size
 from view import View
+from intersection import (
+    Intersection,
+    get_intersection_group,
+)
 
 
 def main():
-    board = Board(
-        size=Size(
-            height=5,
-            width=5,
-        ),
+
+    # Create the board
+    size = Size(
+        height=5,
+        width=5,
     )
+    board = Board(
+        size=size,
+    )
+
+    # Create the players
     one = Player(
         name='one',
         color=Color.RED,
     )
-    # board.build_settlement(
-    #     row=2,
-    #     column=2,
-    #     corner=3,
-    #     player=one,
-    # )
+
+    # Build a settlement
+    intersection = Intersection(
+        row=2,
+        column=2,
+        corner=3,
+    )
+    board.build_settlement(
+        intersection=intersection,
+        player=one,
+    )
+
     print(View(board))
     
 

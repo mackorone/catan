@@ -2,6 +2,7 @@ from const import NUM_CORNERS
 from coordinate import (
     Coordinate,
     get_valid_coordinates,
+    get_valid_neighbors,
 )
 from pieces import (
     HEXAGONS,
@@ -11,6 +12,11 @@ from pprint import pprint
 from random import shuffle
 from resource import Resource
 from tile import Tile
+from intersection import (
+    Intersection,
+    get_intersection_group,
+    get_adjacent_intersection_groups,
+)
 
 
 class Board(object):
@@ -52,23 +58,20 @@ class Board(object):
     #             neighbors.add((other_tile, other_corner))
     #     return neighbors
 
-    def build_city(self, row, column, corner, player):
+    def build_city(self, intersection, player):
         raise NotImplementedError
 
-    def build_settlement(self, row, column, corner, player):
-        assert row < len(self.__board)
-        assert column < len(self.__board[row])
+    def build_settlement(self, intersection, player):
+        # TODO: Ensure connected to a road
+        assert isinstance(intersection, Intersection)
+        assert intersection.coordinate in self.__board
+        assert not self.__board[intersection.coordinate].get_building(intersection.corner)
+        for group in get_adjacent_intersection_groups(self.__size, intersection):
+            for adjacent_intersection in group:
+                assert not self.__board[adjacent_intersection.coordinate].get_building(adjacent_intersection.corner)
         # TODO: Enforce two-hop rule
-        assert not self.__board[row][column].get_building(corner)
-
-        # TODO: MACK - build neighboring settlements
-        self.__board[row][column].build_settlement(corner, player)
-        #print(row, column, corner)
-        # for ((other_row, other_column), other_corner) in (
-        #     self._get_neighboring_tiles(row, column, corner)
-        # ):
-        #     #print(other_row, other_column, other_corner)
-        #     self.__board[other_row][other_column].build_settlement(other_corner, player)
+        for intersection in get_intersection_group(self.__size, intersection):
+            self.__board[intersection.coordinate].build_settlement(intersection.corner, player)
 
     def build_road(self):
         raise NotImplementedError

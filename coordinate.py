@@ -35,16 +35,51 @@ class Coordinate(namedtuple('Coordinate', ['row', 'column'])):
     the coordinate numbering scheme. This helps to keep things consistent for
     mazes of different sizes.
     """
-    def __init__(self, row, column):
-        assert 0 <= row
-        assert 0 <= column
+
+def get_all_coordinates(height):
+    """ All possible coordinates for a board of given height
+    """
+    assert isinstance(height, int)
+    return {
+        Coordinate(row, column)
+        for row in range(height)
+        for column in range(height)
+    }
 
 
 def get_valid_coordinates(size):
+    """ The valid coordinates for a board of given size
+    """
     assert isinstance(size, Size)
-    coordinates = set()
-    for row in range(size.height):
-        for column in range(size.height):
-            if abs(row - column) <= size.width // 2:
-                coordinates.add(Coordinate(row, column))
-    return coordinates
+    all_coordinates = get_all_coordinates(size.height)
+    return {
+        coordinate
+        for coordinate in all_coordinates
+        if abs(coordinate.row - coordinate.column) <= size.width // 2
+    }
+
+
+def get_all_neighbors(coordinate):
+    """ All possible neighbors for a given coordinate
+    """
+    assert isinstance(coordinate, Coordinate)
+    return {
+        Coordinate(coordinate.row + i, coordinate.column + j)
+        for (i, j) in {
+            (-1, -1), (-1,  0), ( 0, -1),
+            ( 0,  1), ( 1,  0), ( 1,  1),
+        }
+    }
+
+
+def get_valid_neighbors(size, coordinate):
+    """ All valid neighbors for a given board size and coordinate
+    """
+    valid_coordinates = get_valid_coordinates(size)
+    assert coordinate in valid_coordinates
+    all_neighbors = get_all_neighbors(coordinate)
+    return {
+        neighbor
+        for neighbor in all_neighbors
+        if neighbor in valid_coordinates
+    }
