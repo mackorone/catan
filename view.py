@@ -5,19 +5,27 @@ from const import (
 )
 
 
-# TODO: MACK - simplify this
 BUILDING_SPACES = [
-    [(2, 9)],
-    [(0, 7)],
-    [(0, 2)],
-    [(2, 0)],
-    [(4, 2)],
-    [(4, 7)],
+    (2, 9),
+    (0, 7),
+    (0, 2),
+    (2, 0),
+    (4, 2),
+    (4, 7),
 ]
 
-# TODO: MACK - simplify this
 NUMBER_SPACES = [
-    [(2, 4), (2, 5)],
+    (2, 4),
+    (2, 5)
+]
+
+PATH_SPACES = [
+    [(1, 8),       ],
+    [(0, 4), (0, 5)],
+    [(1, 1),       ],
+    [(3, 1),       ],
+    [(4, 4), (4, 5)],
+    [(3, 8),       ],
 ]
 
 RESOURCE_SPACES = [
@@ -26,15 +34,6 @@ RESOURCE_SPACES = [
     [(1, 6), (3, 3)],
     [(1, 3), (3, 6)],
     [(2, 2), (2, 7)],
-]
-
-ROAD_SPACES = [
-    [(1, 8),       ],
-    [(0, 4), (0, 5)],
-    [(1, 1),       ],
-    [(3, 1),       ],
-    [(4, 4), (4, 5)],
-    [(3, 8),       ],
 ]
 
 TILE_TEMPLATE = [
@@ -47,7 +46,7 @@ TILE_TEMPLATE = [
 
 
 assert len(BUILDING_SPACES) == NUM_CORNERS
-assert len(ROAD_SPACES) == NUM_EDGES
+assert len(PATH_SPACES) == NUM_EDGES
 
 
 def copy_grid(grid):
@@ -62,13 +61,48 @@ def str_to_grid(string):
     return [[c for c in line] for line in string.split('\n')]
 
 
-def tile_grid(tile):
-    tile_grid = replace_buildings(tile, TILE_TEMPLATE)
-    tile_grid = replace_resources(tile, tile_grid)
+def get_tile_grid(tile):
+    tile_grid = copy_grid(TILE_TEMPLATE)
+    tile_grid = replace_buildings(tile, tile_grid)
     tile_grid = replace_numbers(tile, tile_grid)
     tile_grid = replace_paths(tile, tile_grid)
+    tile_grid = replace_resources(tile, tile_grid)
     return tile_grid
 
+
+def replace_buildings(tile, tile_grid):
+    tile_grid = copy_grid(tile_grid)
+    for corner, (row, col) in enumerate(BUILDING_SPACES):
+        building = tile.get_building(corner)
+        if building:
+            tile_grid[row][col] = (
+                building.player.color.fore(str(building.multiplier))
+            )
+        else:
+            tile_grid[row][col] = Color.GRAY.fore(tile_grid[row][col])
+    return tile_grid
+
+
+def replace_numbers(tile, tile_grid):
+    tile_grid = copy_grid(tile_grid)
+    number_string = (
+        str(tile.number).zfill(len(NUMBER_SPACES))
+        if tile.number else '  '
+    )
+    for row, col in NUMBER_SPACES:
+        index = col - min(NUMBER_SPACES)[1]
+        tile_grid[row][col] = number_string[index]
+    return tile_grid
+
+
+def replace_paths(tile, tile_grid):
+    tile_grid = copy_grid(tile_grid)
+    for edge, spaces in enumerate(PATH_SPACES):
+        for row, col in spaces:
+            # TODO: not always gray
+            tile_grid[row][col] = Color.GRAY.fore(tile_grid[row][col])
+    return tile_grid
+    
 
 def replace_resources(tile, tile_grid):
     tile_grid = copy_grid(tile_grid)
@@ -83,94 +117,61 @@ def replace_resources(tile, tile_grid):
     return tile_grid
 
 
-def replace_numbers(tile, tile_grid):
-    tile_grid = copy_grid(tile_grid)
-    for spaces in NUMBER_SPACES:
-        number_string = (
-            str(tile.number).zfill(len(spaces))
-            if tile.number else '  '
-        )
-        for row, col in spaces:
-            index = col - min(spaces)[1]
-            tile_grid[row][col] = number_string[index]
-    return tile_grid
-
-
-def replace_buildings(tile, tile_grid):
-    tile_grid = copy_grid(tile_grid)
-    for corner, spaces in enumerate(BUILDING_SPACES):
-        for row, col in spaces:
-            building = tile.get_building(corner)
-            if building:
-                tile_grid[row][col] = (
-                    building.player.color.fore(str(building.multiplier))
-                )
-            else:
-                tile_grid[row][col] = Color.GRAY.fore(tile_grid[row][col])
-    return tile_grid
-
-
-def replace_paths(tile, tile_grid):
-    tile_grid = copy_grid(tile_grid)
-    for edge, spaces in enumerate(ROAD_SPACES):
-        for row, col in spaces:
-            # TODO: MACK - not always gray
-            tile_grid[row][col] = Color.GRAY.fore(tile_grid[row][col])
-    return tile_grid
-    
-
-
 class View(object):
 
     def __init__(self, board):
         self.__board = board
 
-    def __str__(self, fancy=True):
-        return grid_to_str(self.grid(fancy))
+    def __str__(self):
+        return grid_to_str(self.get_board_grid())
 
-    # TODO: MACK - refactor this ugly logic
-    def grid(self, fancy=True):
+    def get_board_grid(self):
 
-        tile_height = len(TILE_TEMPLATE)
-        tile_narrow = len(''.join(TILE_TEMPLATE[0]).strip())
-        tile_wide = len(''.join(TILE_TEMPLATE[len(TILE_TEMPLATE) // 2]).strip())
+        # Retrieve the height and width of the board
+        height = self.__board.size.height
+        width = self.__board.size.width
 
-        total_height = (tile_height - 1) * self.__board.height + 1
-        total_width = (
-            (self.__board.width // 2 + 1) * (tile_wide   - 1) +
-            (self.__board.width // 2    ) * (tile_narrow - 1) + 1
+        # The number of characters tall and wide for the tile grid
+        tile_grid_height = len(TILE_TEMPLATE)
+        tile_grid_narrow = len(''.join(TILE_TEMPLATE[0]).strip())
+        tile_grid_wide = len(''.join(TILE_TEMPLATE[2]).strip())
+
+        # The number of characters tall and wide for the board grid
+        total_grid_height = (tile_grid_height - 1) * height + 1
+        total_grid_width = (
+            (width // 2 + 1) * (tile_grid_wide   - 1) +
+            (width // 2    ) * (tile_grid_narrow - 1) + 1
         )
-        grid = [
-            [' ' for i in range(total_width)]
-            for j in range(total_height)
+
+        # Create a 2D array of empty spaces, large enough to
+        # contain all characters for all tiles (but no larger)
+        board_grid = [
+            [' ' for i in range(total_grid_width)]
+            for j in range(total_grid_height)
         ]
 
-        for i, row in enumerate(self.__board):
-            for j, tile in enumerate(row):
+        # For all coordinates ...
+        for coordinate, tile in self.__board:
 
-                if i <= self.__board.width // 2:
-                    spaces_from_top = (i + j) * (tile_height // 2)
-                else:
-                    spaces_from_top = (
-                        ((self.__board.width // 2 + j) * (tile_height // 2)) +
-                        ((i - (self.__board.width // 2)) * (tile_height - 1))
-                    )
+            # ... determine some intermediate values ...
+            sum_ = coordinate.row + coordinate.column
+            difference = coordinate.row - coordinate.column
 
-                if i < self.__board.width // 2:
-                    spaces_from_left = (
-                        ((self.__board.width // 2) - i + j) *
-                        ((tile_wide + tile_narrow) // 2 - 1)
-                    )
-                else:
-                    spaces_from_left = (
-                        j * ((tile_wide + tile_narrow) // 2 - 1)
-                    )
+            # ... and use them to figure the location of the upper
+            # left corner of the tile grid within the board grid ...
+            spaces_from_top = sum_ * (tile_grid_height // 2)
+            spaces_from_left = (
+                ((width // 2) - difference) *
+                ((tile_grid_wide + tile_grid_narrow) // 2 - 1)
+            )
 
-                tile_g = tile_grid(tile)
-                for tile_i, tile_line in enumerate(tile_g):
-                    for tile_j, char in enumerate(tile_line):
-                        if char != ' ':
-                            row = grid[spaces_from_top + tile_i]
-                            row[spaces_from_left + tile_j] = char
-                    
-        return grid
+            # ... and then replace the blank characters in the board
+            # grid with the correct characters from the tile grid
+            tile_grid = get_tile_grid(tile)
+            for i, tile_line in enumerate(tile_grid):
+                for j, char in enumerate(tile_line):
+                    if char != ' ':
+                        row = board_grid[spaces_from_top + i]
+                        row[spaces_from_left + j] = char
+                
+        return board_grid

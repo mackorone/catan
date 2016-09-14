@@ -3,13 +3,16 @@ from color import Color
 from coordinate import Coordinate
 from dice import Dice
 from player import Player
+from size import Size
 from view import View
 
 
 def main():
     board = Board(
-        height=3,
-        width=3,
+        size=Size(
+            height=5,
+            width=5,
+        ),
     )
     one = Player(
         name='one',
@@ -22,7 +25,6 @@ def main():
     #     player=one,
     # )
     print(View(board))
-    #print(Dice.possibilities())
     
 
 if __name__ == '__main__':

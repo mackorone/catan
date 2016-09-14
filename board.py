@@ -1,5 +1,8 @@
 from const import NUM_CORNERS
-from coordinate import Coordinate
+from coordinate import (
+    Coordinate,
+    get_valid_coordinates,
+)
 from pieces import (
     HEXAGONS,
     NUMBERS,
@@ -13,52 +16,19 @@ from tile import Tile
 class Board(object):
     """ Model of the game board
 
-    Rows go from the upper left to the lower right, i.e.:
-
-                   <------- width ------- >
-   
-    ^                       + -- + 
-    |                      /      \ 
-    |                + -- +   00   + -- +
-    |               /      \      /      \ 
-    |         -    +   10   + -- +   01   +    -
-                    \      /      \      /       
-  height    -   20   + -- +   11   + -- +   02   -
-                    /      \      /      \       
-    |         -    +   21   + -- +   12   +    -
-    |               \      /      \      /       
-    |                + -- +   22   + -- +         
-    |                      \      /              
-    v                       + -- +              
-
-    Note that spaces (0, 2) and (2, 0) aren't valid, but
-    the numbering reflects their hypothetical existence.
+    Essentially just a wrapper for a map from Coordinates to Tiles
     """
-    def __init__(self, height, width):
-
-        # Assert valid size
-        assert 1 <= height
-        assert 1 <= width
-        assert width % 2 == 1
-        assert width < height * 2
-
+    def __init__(self, size):
         # Initialize the members
-        self.__height = height
-        self.__width = width
-        self.__board = Board._generate(height, width)
-        pprint(self.__board)
-        exit(0)
+        self.__size = size
+        self.__board = Board._generate(size)
 
     def __iter__(self):
         return iter(self.__board.items())
 
     @property
-    def height(self):
-        return self.__height
-
-    @property
-    def width(self):
-        return self.__width
+    def size(self):
+        return self.__size
 
     # TODO: MACK - return points
     # def _get_neighboring_tiles(self, row, column, corner):
@@ -103,8 +73,9 @@ class Board(object):
     def build_road(self):
         raise NotImplementedError
 
+    # TODO: MACK - move this some place else
     @staticmethod
-    def _generate(height, width):
+    def _generate(size):
 
         # TODO: Hardcoded for size 5 right now
         # TODO: Ensure that two red numbers don't neighbor each other
@@ -125,7 +96,7 @@ class Board(object):
         res_index = 0
         num_index = 0
         board = dict()
-        for coordinate in Board._get_coordinates(height, width):
+        for coordinate in get_valid_coordinates(size):
             resource = hexagons[res_index]
             res_index += 1
             if resource == Resource.DESERT:
@@ -135,20 +106,3 @@ class Board(object):
                 num_index += 1      
             board[coordinate] = Tile(resource, number)
         return board
-
-    @staticmethod
-    def _get_coordinates(height, width):
-        coordinates = set()
-        for row in range(height):
-            coordinates.add(Coordinate(row, row))
-            for i in range(
-            # effective_row_number = (
-            #     row_number
-            #     if row_number <= (height + 1) // 2 - 1
-            #     else height - 1 - row_number
-            # )
-            # return min(
-            #     min(width, height),
-            #     (width // 2 + 1) + effective_row_number,
-            # )
-        return coordinates
