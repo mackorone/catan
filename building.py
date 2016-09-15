@@ -16,3 +16,17 @@ class Building(metaclass=ABCMeta):
     @abstractproperty
     def multiplier(self):
         pass
+
+
+class Settlement(Building):
+
+    @property
+    def multiplier(self):
+        return 1
+
+
+class City(Building):
+
+    @property
+    def multiplier(self):
+        return 2

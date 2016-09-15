@@ -36,8 +36,9 @@ class Coordinate(namedtuple('Coordinate', ['row', 'column'])):
     mazes of different sizes.
     """
 
+
 def get_all_coordinates(height):
-    """ All possible coordinates for a board of given height
+    """ All possibly valid coordinates for a board of given height
     """
     assert isinstance(height, int)
     return {
@@ -61,6 +62,8 @@ def get_valid_coordinates(size):
 
 def get_all_neighbors(coordinate):
     """ All possible neighbors for a given coordinate
+
+    Note that the neighbors might be invalid coordinates
     """
     assert isinstance(coordinate, Coordinate)
     return {
@@ -76,6 +79,7 @@ def get_valid_neighbors(size, coordinate):
     """ All valid neighbors for a given board size and coordinate
     """
     valid_coordinates = get_valid_coordinates(size)
+    assert isinstance(coordinate, Coordinate)
     assert coordinate in valid_coordinates
     all_neighbors = get_all_neighbors(coordinate)
     return {

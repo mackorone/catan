@@ -1,11 +1,10 @@
-from city import City
+from building import Building
 from const import (
     NUM_CORNERS,
     NUM_EDGES,
 )
 from pieces import NUMBERS
 from resource import Resource
-from settlement import Settlement
 
 
 class Tile(object):
@@ -37,13 +36,10 @@ class Tile(object):
     def number(self):
         return self.__number
 
-    def build_city(self, corner, player):
+    def build(self, corner, building):
         assert 0 <= corner < NUM_CORNERS
-        self.__corners[corner] = City(player)
-
-    def build_settlement(self, corner, player):
-        assert 0 <= corner < NUM_CORNERS
-        self.__corners[corner] = Settlement(player)
+        assert isinstance(building, Building)
+        self.__corners[corner] = building
 
     def get_building(self, corner):
         assert 0 <= corner < NUM_CORNERS
