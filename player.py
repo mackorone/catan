@@ -7,6 +7,7 @@ class Player(object):
         assert isinstance(color, Color)
         self.__name = name
         self.__color = color
+        # TODO: need a set of pieces (to be used)
 
     @property
     def name(self):

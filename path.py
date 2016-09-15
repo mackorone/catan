@@ -16,3 +16,10 @@ class Path(metaclass=ABCMeta):
     @abstractproperty
     def permanent(self):
         pass
+
+
+class Road(Path):
+
+    @property
+    def permanent(self):
+        return True
