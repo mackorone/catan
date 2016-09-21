@@ -1,0 +1,11 @@
+- Board
+    - Ports
+    - Roads
+- Turns
+    - Collecting resources
+    - Building
+    - Trading
+- Player
+    - Resource cards
+    - Development cards
+    - Special victory point cards
