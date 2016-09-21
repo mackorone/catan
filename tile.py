@@ -14,11 +14,11 @@ from typing import Union
 
 class Tile(object):
     """
-      2 -- 1       x  1 x    
+      2 -- 1       +  1 +    
      / tile \     2 tile 0   
-    3 corner 0   x  edge  x  
+    3 corner 0   +  edge  +  
      \  #s  /     3  #s  5   
-      4 -- 5       x 4  x    
+      4 -- 5       + 4  +    
     """
 
     def __init__(
