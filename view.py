@@ -76,7 +76,11 @@ def replace_buildings(tile, tile_grid):
         building = tile.get_building(corner)
         if building:
             tile_grid[row][col] = (
-                building.player.color.fore(str(building.multiplier))
+                building.player.color.back(
+                    Color.BLACK.fore(
+                        str(building.multiplier)
+                    )
+                )
             )
         else:
             tile_grid[row][col] = Color.GRAY.fore(tile_grid[row][col])
