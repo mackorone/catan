@@ -1,5 +1,5 @@
 from collections import namedtuple
-from size import Size
+from error import InvalidCoordinateError
 
 
 class Coordinate(namedtuple('Coordinate', ['row', 'column'])):
@@ -37,10 +37,9 @@ class Coordinate(namedtuple('Coordinate', ['row', 'column'])):
     """
 
 
-def get_all_coordinates(height):
+def _get_all_coordinates(height: int):
     """ All possibly valid coordinates for a board of given height
     """
-    assert isinstance(height, int)
     return {
         Coordinate(row, column)
         for row in range(height)
@@ -48,11 +47,10 @@ def get_all_coordinates(height):
     }
 
 
-def get_valid_coordinates(size):
+def get_valid_coordinates(size: 'Size'):
     """ The valid coordinates for a board of given size
     """
-    assert isinstance(size, Size)
-    all_coordinates = get_all_coordinates(size.height)
+    all_coordinates = _get_all_coordinates(size.height)
     return {
         coordinate
         for coordinate in all_coordinates
@@ -60,12 +58,11 @@ def get_valid_coordinates(size):
     }
 
 
-def get_all_neighbors(coordinate):
+def _get_all_neighbors(coordinate: 'Coordinate'):
     """ All possible neighbors for a given coordinate
 
     Note that the neighbors might be invalid coordinates
     """
-    assert isinstance(coordinate, Coordinate)
     return {
         Coordinate(coordinate.row + i, coordinate.column + j)
         for (i, j) in {
@@ -75,13 +72,19 @@ def get_all_neighbors(coordinate):
     }
 
 
-def get_valid_neighbors(size, coordinate):
+def get_valid_neighbors(size: 'Size', coordinate: 'Coordinate'):
     """ All valid neighbors for a given board size and coordinate
     """
     valid_coordinates = get_valid_coordinates(size)
-    assert isinstance(coordinate, Coordinate)
-    assert coordinate in valid_coordinates
-    all_neighbors = get_all_neighbors(coordinate)
+    if coordinate not in valid_coordinates:
+        raise InvalidCoordinateError(
+            '{} is not in {}'.format(
+                coordinate,
+                valid_coordinates,
+            )
+        )
+
+    all_neighbors = _get_all_neighbors(coordinate)
     return {
         neighbor
         for neighbor in all_neighbors

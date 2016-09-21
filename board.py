@@ -1,11 +1,14 @@
 from building import (
-    Building,
     City,
     Settlement,
 )
+from error import (
+    InvalidCityError,
+    InvalidCoordinateError,
+    InvalidSettlementError,
+)
 from generate import generate_board
 from intersection import (
-    Intersection,
     get_intersection_group,
     get_adjacent_intersection_groups,
 )
@@ -16,32 +19,39 @@ class Board(object):
 
     Essentially just a wrapper for a map from Coordinates to Tiles
     """
-    def __init__(self, size):
+    def __init__(self: 'Board', size: 'Size'):
         self.__size = size
         self.__board = generate_board(size)
 
-    def __iter__(self):
+    def __iter__(self: 'Board'):
         return iter(self.__board.items())
 
     @property
-    def size(self):
+    def size(self: 'Board'):
         return self.__size
 
-    def _validate_new_building(self, intersection, building):
-        assert isinstance(building, Building)
-        assert intersection.coordinate in self.__board
+    def _validate_new_building(
+        self: 'Board',
+        intersection: 'Intersection',
+        building: 'Building',
+    ):
+        if intersection.coordinate not in self.__board:
+            raise InvalidCoordinateError
 
-    def _validate_new_settlement(self, intersection, settlement):
-
-        # Perform all validation that applies to all building types
-        assert isinstance(settlement, Settlement)
+    def _validate_new_settlement(
+        self: 'Board',
+        intersection: 'Intersection',
+        settlement: 'Settlement',
+    ):
+        # Perform validate that pertains to all buildings
         self._validate_new_building(intersection, settlement)
 
         # Ensure that nothing is currently in that location
-        assert not (
-            self.__board[intersection.coordinate]
-                .get_building(intersection.corner)
-        )
+        tile = self.__board[intersection.coordinate]
+        if tile.get_building(intersection.corner):
+            raise InvalidSettlementError(
+                'Building already exists at {}'.format(intersection)
+            )
 
         # Enforce the distance rule
         for group in get_adjacent_intersection_groups(
@@ -49,15 +59,22 @@ class Board(object):
             intersection,
         ):
             for adjacent_intersection in group:
-                assert not (
-                    self.__board[adjacent_intersection.coordinate]
-                        .get_building(adjacent_intersection.corner)
-                )
+                adjacent_tile = self.__board[adjacent_intersection.coordinate]
+                if adjacent_tile.get_building(adjacent_intersection.corner):
+                    raise InvalidSettlementError(
+                        '{} failed the distance rule because a building already'
+                        ' exists at {}'.format(
+                            intersection,
+                            adjacent_intersection
+                        )
+                    )
 
-    def _validate_new_city(self, intersection, city):
-
-        # Perform all validation that applies to all building types
-        assert isinstance(intersection, Intersection)
+    def _validate_new_city(
+        self: 'Board',
+        intersection: 'Intersection',
+        city: 'City',
+    ):
+        # Perform validate that pertains to all buildings
         self._validate_new_building(intersection, city)
 
         # Retrieve the existing building
@@ -67,25 +84,47 @@ class Board(object):
         )
 
         # Ensure that a settlement is currently in that location
-        assert isinstance(existing_building, Settlement)
-        
-        # Ensure the the settlement is owned by the correct player
-        assert existing_building.player == city.player
+        if not isinstance(existing_building, Settlement):
+            raise InvalidCityError(
+                'No settlement exists at {}'.format(intersection)
+            )
 
-    def _build_building(self, intersection, building):
+        # Ensure the the settlement is owned by the correct player
+        if existing_building.player != city.player:
+            raise InvalidCityError(
+                'The settlement at {} is owned by {}, not {}'.format(
+                    intersection,
+                    str(existing_building.player),
+                    str(city.player),
+                )
+            )
+
+    def _build_building(
+        self: 'Board',
+        intersection: 'Intersection',
+        building: 'Building',
+    ):
         for intersection in get_intersection_group(self.__size, intersection):
             tile = self.__board[intersection.coordinate]
             tile.build(intersection.corner, building)
 
-    def build_city(self, intersection, player):
+    def build_city(
+        self: 'Board',
+        intersection: 'Intersection',
+        player: 'Player',
+    ):
         city = City(player)
         self._validate_new_city(intersection, city)
         self._build_building(intersection, city)
 
-    def build_settlement(self, intersection, player):
+    def build_settlement(
+        self: 'Board',
+        intersection: 'Intersection',
+        player: 'Player',
+    ):
         settlement = Settlement(player)
         self._validate_new_settlement(intersection, settlement)
         self._build_building(intersection, settlement)
 
-    def build_road(self):
+    def build_road(self: 'Board'):
         raise NotImplementedError

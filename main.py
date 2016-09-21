@@ -22,8 +22,12 @@ def main():
         name='one',
         color=Color.RED,
     )
+    two = Player(
+        name='two',
+        color=Color.BLUE,
+    )
 
-    # Build a settlement and a city
+    # Build two settlements and a city
     intersection = Intersection(
         row=2,
         column=2,
@@ -36,6 +40,14 @@ def main():
     board.build_city(
         intersection=intersection,
         player=one,
+    )
+    board.build_settlement(
+        intersection=Intersection(
+            row=2,
+            column=1,
+            corner=1,
+        ),
+        player=two,
     )
 
     # Print the board

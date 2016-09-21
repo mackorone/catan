@@ -3,8 +3,13 @@ from const import (
     NUM_CORNERS,
     NUM_EDGES,
 )
+from error import (
+    InvalidCornerError,
+    InvalidTileError,
+)
 from pieces import NUMBERS
 from resource import Resource
+from typing import Union
 
 
 class Tile(object):
@@ -16,13 +21,22 @@ class Tile(object):
       4 -- 5       x 4  x    
     """
 
-    def __init__(self, resource, number):
-        assert isinstance(resource, Resource)
-        assert (
-            number in NUMBERS
-            if resource != Resource.DESERT
-            else number is None
-        )
+    def __init__(
+        self: 'Tile',
+        resource: 'Resource',
+        number: Union[int, None],
+    ):
+        if resource == Resource.DESERT:
+            if number is not None:
+                raise InvalidTileError(
+                    # TODO: put a proper error string here
+                )
+        else:
+            if number not in NUMBERS:
+                raise InvalidTileError(
+                    # TODO: put a proper error string here
+                )
+        
         self.__resource = resource
         self.__number = number
         self.__edges = [None] * NUM_EDGES
@@ -36,11 +50,16 @@ class Tile(object):
     def number(self):
         return self.__number
 
-    def build(self, corner, building):
-        assert 0 <= corner < NUM_CORNERS
-        assert isinstance(building, Building)
+    def build(self, corner: int, building: 'Building'):
+        if not 0 <= corner < NUM_CORNERS:
+            raise InvalidCornerError(
+                # TODO: put a proper error string here
+            )
         self.__corners[corner] = building
 
-    def get_building(self, corner):
-        assert 0 <= corner < NUM_CORNERS
+    def get_building(self, corner: int):
+        if not 0 <= corner < NUM_CORNERS:
+            raise InvalidCornerError(
+                # TODO: put a proper error string here
+            )
         return self.__corners[corner]

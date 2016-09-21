@@ -3,7 +3,6 @@ from coordinate import (
     Coordinate,
     get_valid_neighbors,
 )
-from size import Size
 
 
 class Intersection(namedtuple('Intersection', ['row', 'column', 'corner'])):
@@ -19,11 +18,12 @@ class Intersection(namedtuple('Intersection', ['row', 'column', 'corner'])):
         return Intersection(coordinate.row, coordinate.column, corner)
         
 
-def get_intersection_group(size, intersection):
+def get_intersection_group(
+    size: 'Size',
+    intersection: 'Intersection',
+):
     """ Returns the given intersection's equivalence class
     """
-    assert isinstance(size, Size) 
-    assert isinstance(intersection, Intersection) 
 
     # The indices of these tuples correspond to the corner
     offsets = [
@@ -55,11 +55,12 @@ def get_intersection_group(size, intersection):
     return actual_group_members
 
 
-def get_adjacent_intersection_groups(size, intersection):
+def get_adjacent_intersection_groups(
+    size: 'Size',
+    intersection: 'Intersection',
+):
     """ Returns the equivalence classes for all adjacent intersections
     """
-    assert isinstance(size, Size) 
-    assert isinstance(intersection, Intersection) 
 
     adjacent_intersection_groups = set()
     for member in get_intersection_group(size, intersection):
