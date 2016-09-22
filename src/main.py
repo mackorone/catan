@@ -1,4 +1,8 @@
 from board import Board
+from building import (
+    City,
+    Settlement,
+)
 from color import Color
 from player import Player
 from size import Size
@@ -33,26 +37,26 @@ def main():
         column=2,
         corner=3,
     )
-    board.build_settlement(
+    board.build_building(
         intersection=intersection,
-        player=one,
+        building=one.take_piece(Settlement),
     )
-    board.build_city(
+    board.build_building(
         intersection=intersection,
-        player=one,
+        building=one.take_piece(City),
     )
-    board.build_settlement(
+    board.build_building(
         intersection=Intersection(
             row=2,
             column=1,
             corner=1,
         ),
-        player=two,
+        building=two.take_piece(Settlement),
     )
 
     # Print the board
     print(View(board))
-    
+
 
 if __name__ == '__main__':
     main()

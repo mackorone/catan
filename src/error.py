@@ -20,3 +20,7 @@ class InvalidSizeError(Exception):
 
 class InvalidTileError(Exception):
     pass
+
+
+class NoSuchPieceError(Exception):
+    pass

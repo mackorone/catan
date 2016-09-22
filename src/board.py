@@ -43,9 +43,6 @@ class Board(object):
         intersection: 'Intersection',
         settlement: 'Settlement',
     ):
-        # Perform validate that pertains to all buildings
-        self._validate_new_building(intersection, settlement)
-
         # Ensure that nothing is currently in that location
         tile = self.__board[intersection.coordinate]
         if tile.get_building(intersection.corner):
@@ -74,9 +71,6 @@ class Board(object):
         intersection: 'Intersection',
         city: 'City',
     ):
-        # Perform validate that pertains to all buildings
-        self._validate_new_building(intersection, city)
-
         # Retrieve the existing building
         existing_building = (
             self.__board[intersection.coordinate]
@@ -99,32 +93,22 @@ class Board(object):
                 )
             )
 
-    def _build_building(
+    def build_building(
         self: 'Board',
         intersection: 'Intersection',
         building: 'Building',
     ):
+        # Perform some validation
+        self._validate_new_building(intersection, building)
+        if isinstance(building, Settlement):
+            self._validate_new_settlement(intersection, building)
+        if isinstance(building, City):
+            self._validate_new_city(intersection, building)
+
+        # Actually build the building
         for intersection in get_intersection_group(self.__size, intersection):
             tile = self.__board[intersection.coordinate]
-            tile.build(intersection.corner, building)
-
-    def build_city(
-        self: 'Board',
-        intersection: 'Intersection',
-        player: 'Player',
-    ):
-        city = City(player)
-        self._validate_new_city(intersection, city)
-        self._build_building(intersection, city)
-
-    def build_settlement(
-        self: 'Board',
-        intersection: 'Intersection',
-        player: 'Player',
-    ):
-        settlement = Settlement(player)
-        self._validate_new_settlement(intersection, settlement)
-        self._build_building(intersection, settlement)
+            tile.build_building(intersection.corner, building)
 
     def build_road(self: 'Board'):
         raise NotImplementedError

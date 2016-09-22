@@ -29,12 +29,12 @@ class Tile(object):
         if resource == Resource.DESERT:
             if number is not None:
                 raise InvalidTileError(
-                    # TODO: put a proper error string here
+                    'A {} tile must not have a numeric value'.format(resource)
                 )
         else:
             if number not in NUMBERS:
                 raise InvalidTileError(
-                    # TODO: put a proper error string here
+                    'A {} tile must have a numeric value'.format(resource)
                 )
         
         self.__resource = resource
@@ -50,7 +50,7 @@ class Tile(object):
     def number(self):
         return self.__number
 
-    def build(self, corner: int, building: 'Building'):
+    def build_building(self, corner: int, building: 'Building'):
         if not 0 <= corner < NUM_CORNERS:
             raise InvalidCornerError(
                 # TODO: put a proper error string here
