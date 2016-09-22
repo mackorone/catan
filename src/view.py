@@ -19,21 +19,21 @@ NUMBER_SPACES = [
     (2, 5)
 ]
 
-PATH_SPACES = [
-    [(1, 8),       ],
-    [(0, 4), (0, 5)],
-    [(1, 1),       ],
-    [(3, 1),       ],
-    [(4, 4), (4, 5)],
-    [(3, 8),       ],
-]
-
 RESOURCE_SPACES = [
     [(1, 5), (3, 4)],
     [(1, 4), (3, 5)],
     [(1, 6), (3, 3)],
     [(1, 3), (3, 6)],
     [(2, 2), (2, 7)],
+]
+
+ROAD_SPACES = [
+    [(1, 8),       ],
+    [(0, 4), (0, 5)],
+    [(1, 1),       ],
+    [(3, 1),       ],
+    [(4, 4), (4, 5)],
+    [(3, 8),       ],
 ]
 
 TILE_TEMPLATE = [
@@ -46,7 +46,7 @@ TILE_TEMPLATE = [
 
 
 assert len(BUILDING_SPACES) == NUM_CORNERS
-assert len(PATH_SPACES) == NUM_EDGES
+assert len(ROAD_SPACES) == NUM_EDGES
 
 
 def copy_grid(grid):
@@ -65,8 +65,8 @@ def get_tile_grid(tile):
     tile_grid = copy_grid(TILE_TEMPLATE)
     tile_grid = replace_buildings(tile, tile_grid)
     tile_grid = replace_numbers(tile, tile_grid)
-    tile_grid = replace_paths(tile, tile_grid)
     tile_grid = replace_resources(tile, tile_grid)
+    tile_grid = replace_roads(tile, tile_grid)
     return tile_grid
 
 
@@ -99,15 +99,6 @@ def replace_numbers(tile, tile_grid):
     return tile_grid
 
 
-def replace_paths(tile, tile_grid):
-    tile_grid = copy_grid(tile_grid)
-    for edge, spaces in enumerate(PATH_SPACES):
-        for row, col in spaces:
-            # TODO: not always gray
-            tile_grid[row][col] = Color.GRAY.fore(tile_grid[row][col])
-    return tile_grid
-    
-
 def replace_resources(tile, tile_grid):
     tile_grid = copy_grid(tile_grid)
     for value, spaces in enumerate(RESOURCE_SPACES):
@@ -120,6 +111,15 @@ def replace_resources(tile, tile_grid):
                 )
     return tile_grid
 
+
+def replace_roads(tile, tile_grid):
+    tile_grid = copy_grid(tile_grid)
+    for edge, spaces in enumerate(ROAD_SPACES):
+        for row, col in spaces:
+            # TODO: not always gray
+            tile_grid[row][col] = Color.GRAY.fore(tile_grid[row][col])
+    return tile_grid
+    
 
 class View(object):
 

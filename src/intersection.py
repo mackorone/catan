@@ -8,15 +8,10 @@ from coordinate import (
 class Intersection(namedtuple('Intersection', ['row', 'column', 'corner'])):
     """ Represents a location where a building can be placed
     """
-
     @property
     def coordinate(self):
         return Coordinate(self.row, self.column)
 
-    @classmethod
-    def from_coordinate(cls, coordinate, corner):
-        return Intersection(coordinate.row, coordinate.column, corner)
-        
 
 def get_intersection_group(
     size: 'Size',

@@ -1,26 +1,12 @@
-from abc import (
-    ABCMeta,
-    abstractmethod,
-    abstractproperty,
+from collections import namedtuple
+from coordinate import (
+    Coordinate,
 )
 
 
-class Path(metaclass=ABCMeta):
-
-    def __init__(self, player):
-        self.__player = player
-
+class Path(namedtuple('Path', ['row', 'column', 'edge'])):
+    """ Represents a location where a road can be placed
+    """
     @property
-    def player(self):
-        return self.__player
-
-    @abstractproperty
-    def permanent(self):
-        pass
-
-
-class Road(Path):
-
-    @property
-    def permanent(self):
-        return True
+    def coordinate(self):
+        return Coordinate(self.row, self.column)

@@ -4,7 +4,7 @@ from building import (
 )
 from color import Color
 from error import NoSuchPieceError
-from path import Road
+from road import Road
 from typing import Union
 
 
