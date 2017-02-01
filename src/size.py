@@ -4,8 +4,15 @@ from error import InvalidSizeError
 
 class Size(namedtuple('Size', ['height', 'width'])):
     def __init__(self, height, width):
-        # TODO: Replace with InvalidSizeError
-        assert 1 <= height
-        assert 1 <= width
-        assert width % 2 == 1
-        assert width < height * 2
+        if not (
+            1 <= height and
+            1 <= width and
+            width % 2 == 1 and
+            width < height * 2
+        ):
+            raise InvalidSizeError(
+                'Height: {}, Width: {}'.format(
+                    height,
+                    width,
+                )
+            )

@@ -1,4 +1,7 @@
-from coordinate import get_valid_coordinates
+from coordinate import (
+    get_valid_coordinates,
+    get_valid_neighbors,
+)
 from pieces import (
     HEXAGONS,
     NUMBERS,
@@ -14,6 +17,21 @@ def generate_board(size):
     """
     # TODO: Hardcoded for size 5 right now
     # TODO: Ensure that two red numbers don't neighbor each other
+
+
+    # Get red number coordinates
+    coordinates = list(get_valid_coordinates(size))
+    first_four_touching = False
+    while first_four_touching:
+        first_four_touching = False
+        shuffle(coordinates)
+        for i in range(4):
+            for j in range(4):
+                if i == j:
+                    continue
+                if coordinates[i] in get_valid_neighbors(size, coordinates[j]):
+                    first_four_touching = True
+
     hexagons = [
         res
         for res, count in HEXAGONS.items()
