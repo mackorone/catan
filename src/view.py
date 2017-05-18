@@ -161,8 +161,5 @@ class View(object):
                     if char != ' ':
                         row = board_grid[spaces_from_top + i]
                         row[spaces_from_left + j] = char
-                
-        for row in board_grid:
-            for i in range(30):
-                row.insert(0, ' ')
+
         return board_grid
