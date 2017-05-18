@@ -1,5 +1,8 @@
 from collections import namedtuple
-from error import InvalidSizeError
+
+
+class InvalidSizeError(Exception):
+    pass
 
 
 class Size(namedtuple('Size', ['height', 'width'])):
@@ -11,7 +14,7 @@ class Size(namedtuple('Size', ['height', 'width'])):
             width < height * 2
         ):
             raise InvalidSizeError(
-                'Height: {}, Width: {}'.format(
+                'Height={}, Width={}'.format(
                     height,
                     width,
                 )

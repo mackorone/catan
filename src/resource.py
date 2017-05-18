@@ -11,9 +11,6 @@ class Resource(Enum):
     WHEAT  = ('~', Color.YELLOW)
     DESERT = (' ', Color.DEFAULT)
 
-    def __str__(self):
-        return self.name.lower()
-
     @property
     def char(self):
         return self.value[0]

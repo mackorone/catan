@@ -1,5 +1,8 @@
 from collections import namedtuple
-from error import InvalidCoordinateError
+
+
+class InvalidCoordinateError(Exception):
+    pass
 
 
 class Coordinate(namedtuple('Coordinate', ['row', 'column'])):
@@ -37,45 +40,45 @@ class Coordinate(namedtuple('Coordinate', ['row', 'column'])):
     """
 
 
-def _get_all_coordinates(height: int):
+def get_all_coordinates(height):
     """ All possibly valid coordinates for a board of given height
     """
-    return {
+    return [
         Coordinate(row, column)
         for row in range(height)
         for column in range(height)
-    }
+    ]
 
 
-def get_valid_coordinates(size: 'Size'):
+def get_valid_coordinates(size):
     """ The valid coordinates for a board of given size
     """
-    all_coordinates = _get_all_coordinates(size.height)
-    return {
-        coordinate
-        for coordinate in all_coordinates
-        if abs(coordinate.row - coordinate.column) <= size.width // 2
-    }
+    all_coordinates = get_all_coordinates(size.height)
+    return [
+        coordinate for
+        coordinate in all_coordinates if
+        abs(coordinate.row - coordinate.column) <= size.width // 2
+    ]
 
 
-def _get_all_neighbors(coordinate: 'Coordinate'):
+def get_all_neighbors(coordinate):
     """ All possible neighbors for a given coordinate
 
     Note that the neighbors might be invalid coordinates
     """
-    return {
+    return [
         Coordinate(coordinate.row + i, coordinate.column + j)
-        for (i, j) in {
+        for (i, j) in [
             (-1, -1), (-1,  0), ( 0, -1),
             ( 0,  1), ( 1,  0), ( 1,  1),
-        }
-    }
+        ]
+    ]
 
 
-def get_valid_neighbors(size: 'Size', coordinate: 'Coordinate'):
+def get_valid_neighbors(size, coordinate):
     """ All valid neighbors for a given board size and coordinate
     """
-    valid_coordinates = get_valid_coordinates(size)
+    valid_coordinates = set(get_valid_coordinates(size))
     if coordinate not in valid_coordinates:
         raise InvalidCoordinateError(
             '{} is not in {}'.format(
@@ -84,9 +87,9 @@ def get_valid_neighbors(size: 'Size', coordinate: 'Coordinate'):
             )
         )
 
-    all_neighbors = _get_all_neighbors(coordinate)
-    return {
-        neighbor
-        for neighbor in all_neighbors
-        if neighbor in valid_coordinates
-    }
+    all_neighbors = get_all_neighbors(coordinate)
+    return [
+        neighbor for
+        neighbor in all_neighbors if
+        neighbor in valid_coordinates
+    ]

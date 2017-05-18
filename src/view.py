@@ -1,9 +1,13 @@
 from color import Color
-from const import (
-    NUM_CORNERS,
-    NUM_EDGES,
-)
 
+
+TILE_TEMPLATE = [
+   list('  + -- +  '),
+   list(' /      \ '),
+   list('+        +'),
+   list(' \      / '),
+   list('  + -- +  '),
+]
 
 BUILDING_SPACES = [
     (2, 9),
@@ -36,18 +40,6 @@ ROAD_SPACES = [
     [(3, 8),       ],
 ]
 
-TILE_TEMPLATE = [
-   list('  + -- +  '),
-   list(' /      \ '),
-   list('+        +'),
-   list(' \      / '),
-   list('  + -- +  '),
-]
-
-
-assert len(BUILDING_SPACES) == NUM_CORNERS
-assert len(ROAD_SPACES) == NUM_EDGES
-
 
 def copy_grid(grid):
     return [[c for c in row] for row in grid]
@@ -73,17 +65,7 @@ def get_tile_grid(tile):
 def replace_buildings(tile, tile_grid):
     tile_grid = copy_grid(tile_grid)
     for corner, (row, col) in enumerate(BUILDING_SPACES):
-        building = tile.get_building(corner)
-        if building:
-            tile_grid[row][col] = (
-                building.player.color.back(
-                    Color.BLACK.fore(
-                        str(building.multiplier)
-                    )
-                )
-            )
-        else:
-            tile_grid[row][col] = Color.GRAY.fore(tile_grid[row][col])
+        tile_grid[row][col] = Color.GRAY.apply(tile_grid[row][col])
     return tile_grid
 
 
@@ -91,7 +73,7 @@ def replace_numbers(tile, tile_grid):
     tile_grid = copy_grid(tile_grid)
     number_string = (
         str(tile.number).zfill(len(NUMBER_SPACES))
-        if tile.number else '  '
+        if tile.number else ' ' * len(NUMBER_SPACES)
     )
     for row, col in NUMBER_SPACES:
         index = col - min(NUMBER_SPACES)[1]
@@ -99,13 +81,16 @@ def replace_numbers(tile, tile_grid):
     return tile_grid
 
 
-def replace_resources(tile, tile_grid):
+def replace_resources(tile, tile_grid, sparse=False):
     tile_grid = copy_grid(tile_grid)
     for value, spaces in enumerate(RESOURCE_SPACES):
         for row, col in spaces:
-            if tile.number and abs(7 - tile.number) <= value + 1:
+            if (
+                not sparse or
+                tile.number and abs(7 - tile.number) <= value + 1
+            ):
                 tile_grid[row][col] = (
-                    tile.resource.color.fore(
+                    tile.resource.color.apply(
                         tile.resource.char
                     )
                 )
@@ -116,15 +101,14 @@ def replace_roads(tile, tile_grid):
     tile_grid = copy_grid(tile_grid)
     for edge, spaces in enumerate(ROAD_SPACES):
         for row, col in spaces:
-            # TODO: not always gray
-            tile_grid[row][col] = Color.GRAY.fore(tile_grid[row][col])
+            tile_grid[row][col] = Color.GRAY.apply(tile_grid[row][col])
     return tile_grid
     
 
 class View(object):
 
     def __init__(self, board):
-        self.__board = board
+        self.board = board
 
     def __str__(self):
         return grid_to_str(self.get_board_grid())
@@ -132,8 +116,8 @@ class View(object):
     def get_board_grid(self):
 
         # Retrieve the height and width of the board
-        height = self.__board.size.height
-        width = self.__board.size.width
+        height = self.board.size.height
+        width = self.board.size.width
 
         # The number of characters tall and wide for the tile grid
         tile_grid_height = len(TILE_TEMPLATE)
@@ -155,7 +139,7 @@ class View(object):
         ]
 
         # For all coordinates ...
-        for coordinate, tile in self.__board:
+        for coordinate, tile in self.board.items():
 
             # ... determine some intermediate values ...
             sum_ = coordinate.row + coordinate.column
@@ -178,4 +162,7 @@ class View(object):
                         row = board_grid[spaces_from_top + i]
                         row[spaces_from_left + j] = char
                 
+        for row in board_grid:
+            for i in range(30):
+                row.insert(0, ' ')
         return board_grid

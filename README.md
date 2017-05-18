@@ -1,5 +1,5 @@
 # catan
 
-A simple implementation of the board game __Settlers of Catan__
+__Settlers of Catan__ map generator
 
 ![](https://github.com/mackorone/catan/blob/master/image.png)

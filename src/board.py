@@ -1,114 +1,111 @@
-from building import (
-    City,
-    Settlement,
+from coordinate import (
+    get_valid_coordinates,
+    get_valid_neighbors,
 )
-from error import (
-    InvalidCityError,
-    InvalidCoordinateError,
-    InvalidSettlementError,
-)
-from generate import generate_board
-from intersection import (
-    get_intersection_group,
-    get_adjacent_intersection_groups,
-)
+from random import shuffle
+from resource import Resource
+from size import Size
+from tile import Tile
+from view import View
+
+
+def yield_next_resource():
+    order = 3 * [
+       Resource.LUMBER, 
+       Resource.BRICK, 
+       Resource.SHEEP,
+       Resource.WHEAT,
+       Resource.ORE,
+    ] + [
+       Resource.LUMBER, 
+       Resource.SHEEP,
+       Resource.WHEAT,
+       Resource.DESERT,
+    ]
+    i = 0
+    while True:
+        yield order[i % len(order)]
+        i += 1
+
+
+def yield_next_number():
+    order = [
+        6,  8,
+        5,  9,
+        4, 10,
+        3, 11,
+        2, 12,
+        6,  8,
+        5,  9,
+        4, 10,
+        3, 11,
+    ]
+    i = 0
+    while True:
+        yield order[i % len(order)]
+        i += 1
 
 
 class Board(object):
-    """ Model of the game board
 
-    Essentially just a wrapper for a map from Coordinates to Tiles
-    """
-    def __init__(self: 'Board', size: 'Size'):
-        self.__size = size
-        self.__board = generate_board(size)
+    def __init__(self, height, width):
+        self.size = Size(height, width)
+        self.shuffle()
 
-    def __iter__(self: 'Board'):
-        return iter(self.__board.items())
+    def __str__(self):
+        return str(View(self))
 
-    @property
-    def size(self: 'Board'):
-        return self.__size
+    def items(self):
+        return self.board.items()
 
-    def _validate_new_building(
-        self: 'Board',
-        intersection: 'Intersection',
-        building: 'Building',
-    ):
-        if intersection.coordinate not in self.__board:
-            raise InvalidCoordinateError
+    def is_valid(self):
+        special_numbers = [6, 8]
+        for coordinate, tile in self.items():
+            if tile.number in special_numbers:
+                for other in get_valid_neighbors(self.size, coordinate):
+                    if self.board[other].number in special_numbers:
+                        return False
+        return True
 
-    def _validate_new_settlement(
-        self: 'Board',
-        intersection: 'Intersection',
-        settlement: 'Settlement',
-    ):
-        # Ensure that nothing is currently in that location
-        tile = self.__board[intersection.coordinate]
-        if tile.get_building(intersection.corner):
-            raise InvalidSettlementError(
-                'Building already exists at {}'.format(intersection)
-            )
+    def shuffle(self):
 
-        # Enforce the distance rule
-        for group in get_adjacent_intersection_groups(
-            self.__size,
-            intersection,
-        ):
-            for adjacent_intersection in group:
-                adjacent_tile = self.__board[adjacent_intersection.coordinate]
-                if adjacent_tile.get_building(adjacent_intersection.corner):
-                    raise InvalidSettlementError(
-                        '{} failed the distance rule because a building already'
-                        ' exists at {}'.format(
-                            intersection,
-                            adjacent_intersection
-                        )
-                    )
+        # Reset the board
+        self.board = dict()
 
-    def _validate_new_city(
-        self: 'Board',
-        intersection: 'Intersection',
-        city: 'City',
-    ):
-        # Retrieve the existing building
-        existing_building = (
-            self.__board[intersection.coordinate]
-                .get_building(intersection.corner)
-        )
+        # Get a list of all valid board coordinates
+        coordinates = list(get_valid_coordinates(self.size))
 
-        # Ensure that a settlement is currently in that location
-        if not isinstance(existing_building, Settlement):
-            raise InvalidCityError(
-                'No settlement exists at {}'.format(intersection)
-            )
+        # Generate the resources and numbers for the board
+        res_generator = yield_next_resource()
+        num_generator = yield_next_number()
+        resources = []
+        for coordinate in coordinates:
+            resources.append(next(res_generator))
+        numbers = []
+        for resource in resources:
+            if resource is not Resource.DESERT:
+                numbers.append(next(num_generator))
 
-        # Ensure the the settlement is owned by the correct player
-        if existing_building.player != city.player:
-            raise InvalidCityError(
-                'The settlement at {} is owned by {}, not {}'.format(
-                    intersection,
-                    str(existing_building.player),
-                    str(city.player),
-                )
-            )
+        # Lazy way to disperse red numbers
+        for i in range(100):
 
-    def build_building(
-        self: 'Board',
-        intersection: 'Intersection',
-        building: 'Building',
-    ):
-        # Perform some validation
-        self._validate_new_building(intersection, building)
-        if isinstance(building, Settlement):
-            self._validate_new_settlement(intersection, building)
-        if isinstance(building, City):
-            self._validate_new_city(intersection, building)
+            # Shuffle everything
+            shuffle(coordinates)
+            shuffle(resources)
+            shuffle(numbers)
 
-        # Actually build the building
-        for intersection in get_intersection_group(self.__size, intersection):
-            tile = self.__board[intersection.coordinate]
-            tile.build_building(intersection.corner, building)
+            # Populate the board
+            res_index = 0
+            num_index = 0
+            for coordinate in coordinates:
+                resource = resources[res_index]
+                res_index += 1
+                number = None
+                if resource is not Resource.DESERT:
+                    number = numbers[num_index]
+                    num_index += 1
+                self.board[coordinate] = Tile(resource, number)
 
-    def build_road(self: 'Board'):
-        raise NotImplementedError
+            # Check the validity of the board
+            if self.is_valid():
+                break

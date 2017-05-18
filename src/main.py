@@ -1,61 +1,41 @@
+from argparse import ArgumentParser
 from board import Board
-from building import (
-    City,
-    Settlement,
-)
-from color import Color
-from player import Player
-from size import Size
-from view import View
-from intersection import Intersection
+from config import Config
+from size import InvalidSizeError
 
 
 def main():
-
-    # Create the board
-    size = Size(
-        height=5,
-        width=5,
+    parser = ArgumentParser(
+        description='Settlers of Catan map generator',
     )
-    board = Board(
-        size=size,
+    parser.add_argument(
+        '--height',
+        type=int,
+        default=5,
+        help='must be positive',
     )
-
-    # Create the players
-    one = Player(
-        name='one',
-        color=Color.RED,
+    parser.add_argument(
+        '--width',
+        type=int,
+        default=5,
+        help='must be positive, odd, and less than 2x height',
     )
-    two = Player(
-        name='two',
-        color=Color.BLUE,
+    parser.add_argument(
+        '--no-color',
+        action='store_true',
+        default=False,
+        help='suppress terminal colors',
     )
-
-    # Build two settlements and a city
-    intersection = Intersection(
-        row=2,
-        column=2,
-        corner=3,
-    )
-    board.build_building(
-        intersection=intersection,
-        building=one.take_piece(Settlement),
-    )
-    board.build_building(
-        intersection=intersection,
-        building=one.take_piece(City),
-    )
-    board.build_building(
-        intersection=Intersection(
-            row=2,
-            column=1,
-            corner=1,
-        ),
-        building=two.take_piece(Settlement),
-    )
-
-    # Print the board
-    print(View(board))
+    args = parser.parse_args()
+    try:
+        board = Board(args.height, args.width)
+    except InvalidSizeError as e:
+        print('Invalid size: {}'.format(e))
+    except Exception as e:
+        print('Unable to generate map: {}'.format(e))
+    else:
+        Config.NO_COLOR = args.no_color
+        print(board)
 
 
 if __name__ == '__main__':
