@@ -3,6 +3,9 @@ from board import Board
 from config import Config
 from size import InvalidSizeError
 
+from size import Size
+from coordinate import Coordinate
+
 
 def main():
     parser = ArgumentParser(

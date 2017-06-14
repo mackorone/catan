@@ -1,7 +1,4 @@
-from coordinate import (
-    get_valid_coordinates,
-    get_valid_neighbors,
-)
+from coordinate import Coordinate
 from random import shuffle
 from resource import Resource
 from size import Size
@@ -55,25 +52,24 @@ class Board(object):
     def __str__(self):
         return str(View(self))
 
-    def items(self):
-        return self.board.items()
-
     def is_valid(self):
-        special_numbers = [6, 8]
-        for coordinate, tile in self.items():
-            if tile.number in special_numbers:
-                for other in get_valid_neighbors(self.size, coordinate):
-                    if self.board[other].number in special_numbers:
-                        return False
+        # TODO
+        # special_numbers = [6, 8]
+        # for coordinate, tile in self.items():
+        #     if tile.number in special_numbers:
+        #         for other in Coordinate.get_valid_neighbors(self.size, coordinate):
+        #             if self.board[other].number in special_numbers:
+        #                 return False
         return True
 
     def shuffle(self):
 
         # Reset the board
-        self.board = dict()
+        self.center_tiles = dict()
+        self.border_tiles = dict()
 
-        # Get a list of all valid board coordinates
-        coordinates = list(get_valid_coordinates(self.size))
+        # Get a list of all resource coordinates
+        coordinates = Coordinate.get_valid_coordinates(self.size)
 
         # Generate the resources and numbers for the board
         res_generator = yield_next_resource()
@@ -104,8 +100,12 @@ class Board(object):
                 if resource is not Resource.DESERT:
                     number = numbers[num_index]
                     num_index += 1
-                self.board[coordinate] = Tile(resource, number)
+                self.center_tiles[coordinate] = Tile(resource, number)
 
             # Check the validity of the board
             if self.is_valid():
                 break
+
+        # Populate the ports 
+        for coordinate in Coordinate.get_border_coordinates(self.size):
+            self.border_tiles[coordinate] = Tile(None, None)
