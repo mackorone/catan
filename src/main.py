@@ -1,10 +1,9 @@
+import sys
+
 from argparse import ArgumentParser
 from board import Board
 from config import Config
 from size import InvalidSizeError
-
-from size import Size
-from coordinate import Coordinate
 
 
 def main():
@@ -34,8 +33,10 @@ def main():
         board = Board(args.height, args.width)
     except InvalidSizeError as e:
         print('Invalid size: {}'.format(e))
+        sys.exit(1)
     except Exception as e:
         print('Unable to generate map: {}'.format(e))
+        sys.exit(1)
     else:
         Config.NO_COLOR = args.no_color
         print(board)

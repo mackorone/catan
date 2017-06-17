@@ -10,11 +10,11 @@ CENTER_TILE_TEMPLATE = [
 ]
 
 BORDER_TILE_TEMPLATE = [
-   list(' |  --  | '),
+   list('  | -- |  '),
    list(' -      - '),
-   list(' |      | '),
+   list('  |    |  '),
    list(' -      - '),
-   list(' |  --  | '),
+   list('  | -- |  '),
 ]
 
 NUMBER_SPACES = [
@@ -22,16 +22,14 @@ NUMBER_SPACES = [
 ]
 
 PERIMETER_SPACES = [
-    (0, 1), (0, 2),
-    (0, 4), (0, 5),
-    (0, 7), (0, 8),
+    (0, 2), (0, 4),
+    (0, 5), (0, 7),
     (1, 1), (1, 8),
-    (2, 0), (2, 1),
-    (2, 8), (2, 9),
+    (2, 0), (2, 2),
+    (2, 7), (2, 9),
     (3, 1), (3, 8),
-    (4, 1), (4, 2),
-    (4, 4), (4, 5),
-    (4, 7), (4, 8),
+    (4, 2), (4, 4),
+    (4, 5), (4, 7),
 ]
 
 RESOURCE_SPACES = [
@@ -148,7 +146,93 @@ class View(object):
 
                 # ... and then replace the blank characters in the board
                 # grid with the correct characters from the tile grid
-                tile_grid = get_tile_grid(tile, template)
+
+                # TODO: MACK
+                copy = copy_grid(template)
+
+                if template == BORDER_TILE_TEMPLATE:
+
+                    helper_value_one = (
+                        self.board.size.height -
+                        self.board.size.width // 2
+                    )
+                    helper_value_two = (
+                        abs(diff) <= self.board.size.width // 2
+                    )
+
+                    # Top two ticks
+                    if not (
+                        coordinate.row == -1 or
+                        coordinate.column == -1
+                    ):
+                        copy[0][4] = ' '
+                        copy[0][5] = ' '
+
+                    # Bottom two ticks
+                    if not (
+                        coordinate.row == self.board.size.height or
+                        coordinate.column == self.board.size.height
+                    ):
+                        copy[4][4] = ' '
+                        copy[4][5] = ' '
+
+                    # Upper left single tick
+                    if not (
+                        coordinate.column == -1 and
+                        coordinate.row < self.board.size.width // 2
+                    ):
+                        copy[1][1] = ' '
+
+                    # Upper right single tick
+                    if not (
+                        coordinate.row == -1 and
+                        coordinate.column < self.board.size.width // 2
+                    ):
+                        copy[1][8] = ' '
+
+                    # Bottom left tick
+                    if not (
+                        coordinate.row == self.board.size.height and
+                        helper_value_one <= coordinate.column
+                    ):
+                        copy[3][1] = ' '
+
+                    # Bottom right tick
+                    if not (
+                        coordinate.column == self.board.size.height and
+                        helper_value_one <= coordinate.row
+                    ):
+                        copy[3][8] = ' '
+
+                    # Left vertical tick marks
+                    if helper_value_two or diff < 0:
+                        copy[0][2] = ' '
+                        copy[2][2] = ' '
+                        copy[4][2] = ' '
+                    
+                    # Right vertical tick marks
+                    if helper_value_two or 0 < diff:
+                        copy[0][7] = ' '
+                        copy[2][7] = ' '
+                        copy[4][7] = ' '
+
+                    # Top vertical tick marks
+                    if (
+                        coordinate.row == -1 or
+                        coordinate.column == -1
+                    ):
+                        copy[0][2] = ' '
+                        copy[0][7] = ' '
+
+                    # Bottom vertical tick marks
+                    if (
+                        coordinate.row == self.board.size.height or
+                        coordinate.column == self.board.size.height
+                    ):
+                        copy[4][2] = ' '
+                        copy[4][7] = ' '
+
+                tile_grid = get_tile_grid(tile, copy)
                 for i, tile_line in enumerate(tile_grid):
                     for j, char in enumerate(tile_line):
                         if char != ' ':
