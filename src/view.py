@@ -41,6 +41,81 @@ RESOURCE_SPACES = [
 ]
 
 
+def remove_border_characters(board, coordinate, diff, tile_grid):
+
+    # First, calculate some helper values
+    helper_value_one = board.size.width // 2
+    helper_value_two = board.size.height - helper_value_one
+
+    # Top vertical ticks
+    if (
+        coordinate.row == -1 or
+        coordinate.column == -1
+    ):
+        tile_grid[0][2] = ' '
+        tile_grid[0][7] = ' '
+
+    # Top horizonal ticks
+    else:
+        tile_grid[0][4] = ' '
+        tile_grid[0][5] = ' '
+
+    # Bottom vertical ticks
+    if (
+        coordinate.row == board.size.height or
+        coordinate.column == board.size.height
+    ):
+        tile_grid[4][2] = ' '
+        tile_grid[4][7] = ' '
+
+    # Bottom horizonal ticks
+    else:
+        tile_grid[4][4] = ' '
+        tile_grid[4][5] = ' '
+
+    # Upper left single tick
+    if not (
+        coordinate.column == -1 and
+        coordinate.row < helper_value_one
+    ):
+        tile_grid[1][1] = ' '
+
+    # Upper right single tick
+    if not (
+        coordinate.row == -1 and
+        coordinate.column < helper_value_one
+    ):
+        tile_grid[1][8] = ' '
+
+    # Bottom left single tick
+    if not (
+        coordinate.row == board.size.height and
+        helper_value_two <= coordinate.column
+    ):
+        tile_grid[3][1] = ' '
+
+    # Bottom right single tick
+    if not (
+        coordinate.column == board.size.height and
+        helper_value_two <= coordinate.row
+    ):
+        tile_grid[3][8] = ' '
+
+    # Left vertical ticks
+    if abs(diff) <= helper_value_one or diff < 0:
+        tile_grid[0][2] = ' '
+        tile_grid[2][2] = ' '
+        tile_grid[4][2] = ' '
+    
+    # Right vertical ticks
+    if abs(diff) <= helper_value_one or 0 < diff:
+        tile_grid[0][7] = ' '
+        tile_grid[2][7] = ' '
+        tile_grid[4][7] = ' '
+
+    return tile_grid
+
+
 def copy_grid(grid):
     return [[char for char in row] for row in grid]
 
@@ -53,8 +128,8 @@ def str_to_grid(string):
     return [[c for c in line] for line in string.split('\n')]
 
 
-def get_tile_grid(tile, template):
-    tile_grid = copy_grid(template)
+def get_tile_grid(tile, tile_grid):
+    tile_grid = copy_grid(tile_grid)
     tile_grid = replace_numbers(tile, tile_grid)
     tile_grid = replace_perimeter(tile, tile_grid)
     tile_grid = replace_resources(tile, tile_grid)
@@ -125,9 +200,9 @@ class View(object):
         ]
 
         # For all border and center coordinates ...
-        for group, template in [
-            (self.board.border_tiles, BORDER_TILE_TEMPLATE),
-            (self.board.center_tiles, CENTER_TILE_TEMPLATE),
+        for group in [
+            self.board.border_tiles,
+            self.board.center_tiles,
         ]:
             for coordinate, tile in group.items():
 
@@ -135,7 +210,7 @@ class View(object):
                 # Note: We add +1 here to account for perimeter tiles
                 sum_ = (coordinate.row + 1) + (coordinate.column + 1)
                 diff = (coordinate.row + 1) - (coordinate.column + 1)
-
+ 
                 # ... and use them to figure the location of the upper
                 # left corner of the tile grid within the board grid ...
                 spaces_from_top = sum_ * (tile_grid_height // 2)
@@ -144,99 +219,27 @@ class View(object):
                     ((tile_grid_wide + tile_grid_narrow) // 2 - 1)
                 )
 
+                # ... then retrieve the base tile grid for the tile ...
+                template = (
+                    CENTER_TILE_TEMPLATE if
+                    group == self.board.center_tiles else
+                    remove_border_characters(
+                        board=self.board,
+                        coordinate=coordinate,
+                        diff=diff,
+                        tile_grid=copy_grid(BORDER_TILE_TEMPLATE),
+                    )
+                )
+
                 # ... and then replace the blank characters in the board
                 # grid with the correct characters from the tile grid
-
-                # TODO: MACK
-                copy = copy_grid(template)
-
-                if template == BORDER_TILE_TEMPLATE:
-
-                    helper_value_one = (
-                        self.board.size.height -
-                        self.board.size.width // 2
-                    )
-                    helper_value_two = (
-                        abs(diff) <= self.board.size.width // 2
-                    )
-
-                    # Top two ticks
-                    if not (
-                        coordinate.row == -1 or
-                        coordinate.column == -1
-                    ):
-                        copy[0][4] = ' '
-                        copy[0][5] = ' '
-
-                    # Bottom two ticks
-                    if not (
-                        coordinate.row == self.board.size.height or
-                        coordinate.column == self.board.size.height
-                    ):
-                        copy[4][4] = ' '
-                        copy[4][5] = ' '
-
-                    # Upper left single tick
-                    if not (
-                        coordinate.column == -1 and
-                        coordinate.row < self.board.size.width // 2
-                    ):
-                        copy[1][1] = ' '
-
-                    # Upper right single tick
-                    if not (
-                        coordinate.row == -1 and
-                        coordinate.column < self.board.size.width // 2
-                    ):
-                        copy[1][8] = ' '
-
-                    # Bottom left tick
-                    if not (
-                        coordinate.row == self.board.size.height and
-                        helper_value_one <= coordinate.column
-                    ):
-                        copy[3][1] = ' '
-
-                    # Bottom right tick
-                    if not (
-                        coordinate.column == self.board.size.height and
-                        helper_value_one <= coordinate.row
-                    ):
-                        copy[3][8] = ' '
-
-                    # Left vertical tick marks
-                    if helper_value_two or diff < 0:
-                        copy[0][2] = ' '
-                        copy[2][2] = ' '
-                        copy[4][2] = ' '
-                    
-                    # Right vertical tick marks
-                    if helper_value_two or 0 < diff:
-                        copy[0][7] = ' '
-                        copy[2][7] = ' '
-                        copy[4][7] = ' '
-
-                    # Top vertical tick marks
-                    if (
-                        coordinate.row == -1 or
-                        coordinate.column == -1
-                    ):
-                        copy[0][2] = ' '
-                        copy[0][7] = ' '
-
-                    # Bottom vertical tick marks
-                    if (
-                        coordinate.row == self.board.size.height or
-                        coordinate.column == self.board.size.height
-                    ):
-                        copy[4][2] = ' '
-                        copy[4][7] = ' '
-
-                tile_grid = get_tile_grid(tile, copy)
+                tile_grid = get_tile_grid(tile, template)
                 for i, tile_line in enumerate(tile_grid):
                     for j, char in enumerate(tile_line):
                         if char != ' ':
                             row = board_grid[spaces_from_top + i]
                             row[spaces_from_left + j] = char
 
+        # Trim extra columns off front and back of the grid
+        board_grid = [row[2:-2] for row in board_grid]
         return board_grid
