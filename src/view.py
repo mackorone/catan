@@ -1,4 +1,9 @@
 from color import Color
+from orientation import Orientation
+from tile import (
+    Terrain,
+    Harbor,
+)
 
 
 CENTER_TILE_TEMPLATE = [
@@ -39,6 +44,15 @@ RESOURCE_SPACES = [
     (3, 3), (3, 4),
     (3, 5), (3, 6),
 ]
+
+HARBOR_BRIDGE_SPACES = {
+    Orientation.NORTH_EAST: [(2, 7), (1, 6)],
+    Orientation.NORTH:      [(1, 6), (1, 3)],
+    Orientation.NORTH_WEST: [(1, 3), (2, 2)],
+    Orientation.SOUTH_EAST: [(2, 2), (3, 3)],
+    Orientation.SOUTH:      [(3, 3), (3, 6)],
+    Orientation.SOUTH_WEST: [(3, 6), (2, 7)],
+}
 
 
 def remove_border_characters(board, coordinate, diff, tile_grid):
@@ -137,10 +151,13 @@ def get_tile_grid(tile, tile_grid):
 
 
 def replace_numbers(tile, tile_grid):
+    if isinstance(tile, Harbor):
+        return tile_grid
     if not tile.number:
         return tile_grid
+    if isinstance(tile, Terrain):
+        number_string = str(tile.number).zfill(len(NUMBER_SPACES))
     tile_grid = copy_grid(tile_grid)
-    number_string = str(tile.number).zfill(len(NUMBER_SPACES))
     for row, col in NUMBER_SPACES:
         index = col - min(NUMBER_SPACES)[1]
         tile_grid[row][col] = number_string[index]
@@ -152,16 +169,30 @@ def replace_perimeter(tile, tile_grid):
     for row, col in PERIMETER_SPACES:
         colored = Color.GRAY.apply(tile_grid[row][col])
         tile_grid[row][col] = colored
+    if isinstance(tile, Harbor):
+        spaces = HARBOR_BRIDGE_SPACES[tile.orientation]
+        for row, col in spaces:
+            char = '-'
+            if row != 2:
+                char = '\\' if (row == 1) == (col == 3) else '/'
+            colored = Color.GRAY.apply(char)
+            tile_grid[row][col] = colored
     return tile_grid
 
 
 def replace_resources(tile, tile_grid):
-    if not tile.resource:
-        return tile_grid
+    if isinstance(tile, Harbor):
+        spaces = NUMBER_SPACES
+    if isinstance(tile, Terrain):
+        if not tile.resource:
+            return tile_grid
+        spaces = RESOURCE_SPACES
+    char = '?'
+    if tile.resource:
+        char = tile.resource.color.apply(tile.resource.char)
     tile_grid = copy_grid(tile_grid)
-    for row, col in RESOURCE_SPACES:
-        colored = tile.resource.color.apply(tile.resource.char)
-        tile_grid[row][col] = colored
+    for row, col in spaces:
+        tile_grid[row][col] = char
     return tile_grid
 
 

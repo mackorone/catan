@@ -1,8 +1,12 @@
 from coordinate import Coordinate
+from orientation import Orientation
 from random import shuffle
 from resource import Resource
 from size import Size
-from tile import Tile
+from tile import (
+    Harbor,
+    Terrain,
+)
 from view import View
 
 
@@ -100,12 +104,12 @@ class Board(object):
                 if resource is not Resource.DESERT:
                     number = numbers[num_index]
                     num_index += 1
-                self.center_tiles[coordinate] = Tile(resource, number)
+                self.center_tiles[coordinate] = Terrain(resource, number)
 
             # Check the validity of the board
             if self.is_valid():
                 break
 
         # Populate the ports 
-        for coordinate in Coordinate.get_border_coordinates(self.size):
-            self.border_tiles[coordinate] = Tile(None, None)
+        for i, coordinate in enumerate(Coordinate.get_border_coordinates(self.size)):
+            self.border_tiles[coordinate] = Harbor(None, Orientation(i % 6))

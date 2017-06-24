@@ -1,17 +1,9 @@
 from collections import namedtuple
-from resource import Resource
 
 
-class InvalidTileError(Exception):
-    pass
+Terrain = namedtuple('Terrain', ['resource', 'number'])
+Terrain.__new__.__defaults__ = (None, None)
 
 
-class Tile(namedtuple('Tile', ['resource', 'number'])):
-    def __init__(self, resource, number):
-        if resource is Resource.DESERT and number is not None:
-            raise InvalidTileError(
-                'Resource={}, Number={}'.format(
-                    resource,
-                    number,
-                )
-            )
+Harbor = namedtuple('Harbor', ['resource', 'orientation'])
+Harbor.__new__.__defaults__ = (None, None)
