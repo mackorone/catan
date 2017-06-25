@@ -21,7 +21,7 @@ def yield_next_resource():
        Resource.LUMBER, 
        Resource.SHEEP,
        Resource.WHEAT,
-       Resource.DESERT,
+       None,
     ]
     i = 0
     while True:
@@ -57,20 +57,18 @@ class Board(object):
         return str(View(self))
 
     def is_valid(self):
-        # TODO
-        # special_numbers = [6, 8]
-        # for coordinate, tile in self.items():
-        #     if tile.number in special_numbers:
-        #         for other in Coordinate.get_valid_neighbors(self.size, coordinate):
-        #             if self.board[other].number in special_numbers:
-        #                 return False
+        special_numbers = [6, 8]
+        for coordinate, tile in self.tiles.items():
+            if tile.number in special_numbers:
+                for other in coordinate.get_valid_neighbors(self.size):
+                    if self.tiles[other].number in special_numbers:
+                        return False
         return True
 
     def shuffle(self):
 
         # Reset the board
-        self.center_tiles = dict()
-        self.border_tiles = dict()
+        self.tiles = dict()
 
         # Get a list of all resource coordinates
         coordinates = Coordinate.get_valid_coordinates(self.size)
@@ -83,7 +81,7 @@ class Board(object):
             resources.append(next(res_generator))
         numbers = []
         for resource in resources:
-            if resource is not Resource.DESERT:
+            if resource is not None:
                 numbers.append(next(num_generator))
 
         # Lazy way to disperse red numbers
@@ -101,10 +99,10 @@ class Board(object):
                 resource = resources[res_index]
                 res_index += 1
                 number = None
-                if resource is not Resource.DESERT:
+                if resource is not None:
                     number = numbers[num_index]
                     num_index += 1
-                self.center_tiles[coordinate] = Terrain(resource, number)
+                self.tiles[coordinate] = Terrain(resource, number)
 
             # Check the validity of the board
             if self.is_valid():
@@ -112,4 +110,22 @@ class Board(object):
 
         # Populate the ports 
         for i, coordinate in enumerate(Coordinate.get_border_coordinates(self.size)):
-            self.border_tiles[coordinate] = Harbor(None, Orientation(i % 6))
+            # TODO: upforgrabs
+            # These are hard-coded for a normal sized board;
+            # harbor tiles should work for all sized boards
+            harbors = {
+                (-1,  0): (           None, Orientation.SOUTH     ),
+                (-1,  2): (           None, Orientation.SOUTH_WEST),
+                ( 0, -1): ( Resource.SHEEP, Orientation.SOUTH     ),
+                ( 1,  4): ( Resource.BRICK, Orientation.NORTH_WEST),
+                ( 2, -1): (           None, Orientation.SOUTH_EAST),
+                ( 3,  5): (Resource.LUMBER, Orientation.NORTH_WEST),
+                ( 4,  1): (   Resource.ORE, Orientation.NORTH_EAST),
+                ( 5,  3): ( Resource.WHEAT, Orientation.NORTH_EAST),
+                ( 5,  5): (           None, Orientation.NORTH     ),
+            }
+            resource, orientation = harbors.get(
+                (coordinate.row, coordinate.column),
+                (None, None),
+            )
+            self.tiles[coordinate] = Harbor(resource, orientation)

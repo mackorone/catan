@@ -49,9 +49,9 @@ HARBOR_BRIDGE_SPACES = {
     Orientation.NORTH_EAST: [(2, 7), (1, 6)],
     Orientation.NORTH:      [(1, 6), (1, 3)],
     Orientation.NORTH_WEST: [(1, 3), (2, 2)],
-    Orientation.SOUTH_EAST: [(2, 2), (3, 3)],
+    Orientation.SOUTH_WEST: [(2, 2), (3, 3)],
     Orientation.SOUTH:      [(3, 3), (3, 6)],
-    Orientation.SOUTH_WEST: [(3, 6), (2, 7)],
+    Orientation.SOUTH_EAST: [(3, 6), (2, 7)],
 }
 
 
@@ -169,24 +169,25 @@ def replace_perimeter(tile, tile_grid):
     for row, col in PERIMETER_SPACES:
         colored = Color.GRAY.apply(tile_grid[row][col])
         tile_grid[row][col] = colored
-    if isinstance(tile, Harbor):
+    if isinstance(tile, Harbor) and tile.orientation:
         spaces = HARBOR_BRIDGE_SPACES[tile.orientation]
         for row, col in spaces:
             char = '-'
             if row != 2:
                 char = '\\' if (row == 1) == (col == 3) else '/'
-            colored = Color.GRAY.apply(char)
-            tile_grid[row][col] = colored
+            tile_grid[row][col] = Color.GRAY.apply(char)
     return tile_grid
 
 
 def replace_resources(tile, tile_grid):
-    if isinstance(tile, Harbor):
-        spaces = NUMBER_SPACES
     if isinstance(tile, Terrain):
         if not tile.resource:
             return tile_grid
         spaces = RESOURCE_SPACES
+    if isinstance(tile, Harbor):
+        if not tile.orientation:
+            return tile_grid
+        spaces = NUMBER_SPACES
     char = '?'
     if tile.resource:
         char = tile.resource.color.apply(tile.resource.char)
@@ -230,46 +231,42 @@ class View(object):
             for j in range(total_grid_height)
         ]
 
-        # For all border and center coordinates ...
-        for group in [
-            self.board.border_tiles,
-            self.board.center_tiles,
-        ]:
-            for coordinate, tile in group.items():
+        # For all board tiles ...
+        for coordinate, tile in self.board.tiles.items():
 
-                # ... determine some intermediate values ...
-                # Note: We add +1 here to account for perimeter tiles
-                sum_ = (coordinate.row + 1) + (coordinate.column + 1)
-                diff = (coordinate.row + 1) - (coordinate.column + 1)
- 
-                # ... and use them to figure the location of the upper
-                # left corner of the tile grid within the board grid ...
-                spaces_from_top = sum_ * (tile_grid_height // 2)
-                spaces_from_left = (
-                    ((num_tiles_wide // 2) - diff) *
-                    ((tile_grid_wide + tile_grid_narrow) // 2 - 1)
+            # ... determine some intermediate values ...
+            # Note: We add +1 here to account for perimeter tiles
+            sum_ = (coordinate.row + 1) + (coordinate.column + 1)
+            diff = (coordinate.row + 1) - (coordinate.column + 1)
+
+            # ... and use them to figure the location of the upper
+            # left corner of the tile grid within the board grid ...
+            spaces_from_top = sum_ * (tile_grid_height // 2)
+            spaces_from_left = (
+                ((num_tiles_wide // 2) - diff) *
+                ((tile_grid_wide + tile_grid_narrow) // 2 - 1)
+            )
+
+            # ... then retrieve the base tile grid for the tile ...
+            template = (
+                CENTER_TILE_TEMPLATE if
+                isinstance(tile, Terrain) else
+                remove_border_characters(
+                    board=self.board,
+                    coordinate=coordinate,
+                    diff=diff,
+                    tile_grid=copy_grid(BORDER_TILE_TEMPLATE),
                 )
+            )
 
-                # ... then retrieve the base tile grid for the tile ...
-                template = (
-                    CENTER_TILE_TEMPLATE if
-                    group == self.board.center_tiles else
-                    remove_border_characters(
-                        board=self.board,
-                        coordinate=coordinate,
-                        diff=diff,
-                        tile_grid=copy_grid(BORDER_TILE_TEMPLATE),
-                    )
-                )
-
-                # ... and then replace the blank characters in the board
-                # grid with the correct characters from the tile grid
-                tile_grid = get_tile_grid(tile, template)
-                for i, tile_line in enumerate(tile_grid):
-                    for j, char in enumerate(tile_line):
-                        if char != ' ':
-                            row = board_grid[spaces_from_top + i]
-                            row[spaces_from_left + j] = char
+            # ... and then replace the blank characters in the board
+            # grid with the correct characters from the tile grid
+            tile_grid = get_tile_grid(tile, template)
+            for i, tile_line in enumerate(tile_grid):
+                for j, char in enumerate(tile_line):
+                    if ' ' not in char:
+                        row = board_grid[spaces_from_top + i]
+                        row[spaces_from_left + j] = char
 
         # Trim extra columns off front and back of the grid
         board_grid = [row[2:-2] for row in board_grid]

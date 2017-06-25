@@ -9,7 +9,6 @@ class Resource(Enum):
     ORE    = ('^', Color.BLUE)
     SHEEP  = (':', Color.WHITE)
     WHEAT  = ('~', Color.YELLOW)
-    DESERT = (' ', Color.DEFAULT)
 
     @property
     def char(self):
