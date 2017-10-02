@@ -1,4 +1,3 @@
 # TODO
-- Add --expansion option to generate expansion-sized map
-- Ensure expansion-sized map has the correct number of each tile
+- Fix ports, resources, and numbers to work with all size mazes
 - Guarantee good distribution of red numbers

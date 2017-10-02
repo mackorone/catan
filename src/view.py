@@ -45,14 +45,16 @@ RESOURCE_SPACES = [
     (3, 5), (3, 6),
 ]
 
-HARBOR_BRIDGE_SPACES = {
-    Orientation.NORTH_EAST: [(2, 7), (1, 6)],
-    Orientation.NORTH:      [(1, 6), (1, 3)],
-    Orientation.NORTH_WEST: [(1, 3), (2, 2)],
-    Orientation.SOUTH_WEST: [(2, 2), (3, 3)],
-    Orientation.SOUTH:      [(3, 3), (3, 6)],
-    Orientation.SOUTH_EAST: [(3, 6), (2, 7)],
-}
+# TODO: upforgrabs
+# Fix ports to work with all size boards
+# HARBOR_BRIDGE_SPACES = {
+#     Orientation.NORTH_EAST: [(2, 7), (1, 6)],
+#     Orientation.NORTH:      [(1, 6), (1, 3)],
+#     Orientation.NORTH_WEST: [(1, 3), (2, 2)],
+#     Orientation.SOUTH_WEST: [(2, 2), (3, 3)],
+#     Orientation.SOUTH:      [(3, 3), (3, 6)],
+#     Orientation.SOUTH_EAST: [(3, 6), (2, 7)],
+# }
 
 
 def remove_border_characters(board, coordinate, diff, tile_grid):
@@ -169,13 +171,15 @@ def replace_perimeter(tile, tile_grid):
     for row, col in PERIMETER_SPACES:
         colored = Color.GRAY.apply(tile_grid[row][col])
         tile_grid[row][col] = colored
-    if isinstance(tile, Harbor) and tile.orientation:
-        spaces = HARBOR_BRIDGE_SPACES[tile.orientation]
-        for row, col in spaces:
-            char = '-'
-            if row != 2:
-                char = '\\' if (row == 1) == (col == 3) else '/'
-            tile_grid[row][col] = Color.GRAY.apply(char)
+    # TODO: upforgrabs
+    # Fix ports to work with all size boards
+    # if isinstance(tile, Harbor) and tile.orientation:
+    #     spaces = HARBOR_BRIDGE_SPACES[tile.orientation]
+    #     for row, col in spaces:
+    #         char = '-'
+    #         if row != 2:
+    #             char = '\\' if (row == 1) == (col == 3) else '/'
+    #         tile_grid[row][col] = Color.GRAY.apply(char)
     return tile_grid
 
 
@@ -185,8 +189,11 @@ def replace_resources(tile, tile_grid):
             return tile_grid
         spaces = RESOURCE_SPACES
     if isinstance(tile, Harbor):
-        if not tile.orientation:
-            return tile_grid
+        # TODO: upforgrabs
+        # Fix ports to work with all size boards
+        # if not tile.orientation:
+        #     return tile_grid
+        return tile_grid
         spaces = NUMBER_SPACES
     char = '?'
     if tile.resource:
