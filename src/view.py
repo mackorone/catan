@@ -276,5 +276,5 @@ class View(object):
                         row[spaces_from_left + j] = char
 
         # Trim extra columns off front and back of the grid
-        board_grid = [row[2:-2] for row in board_grid]
+        board_grid = [''] + [row       for row in board_grid] + ['']
         return board_grid
